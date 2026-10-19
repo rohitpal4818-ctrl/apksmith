@@ -87,11 +87,24 @@ class Workspace:
     def source_dir(self, digest: str) -> Path | None:
         return self._dirs.get(digest)
 
+    def allocate(self, digest: str) -> Path:
+        """Reserve and return an output directory for this session.
+
+        Decompiled output runs to tens of thousands of files, so it has to go
+        somewhere temporary rather than into the caller's working directory.
+        Exposed publicly so the tools never reach into ``_root``.
+        """
+        return self._root / digest
+
     def remember(self, digest: str, path: Path) -> None:
         self._dirs[digest] = path
 
     def cleanup(self) -> None:
         shutil.rmtree(self._root, ignore_errors=True)
+
+
+#: Workspaces built during this process, so main() can clean them up.
+_LIVE_WORKSPACES: list[Workspace] = []
 
 
 def _apk_digest(path: str | Path) -> str:
@@ -113,6 +126,8 @@ def build_server():
 
     mcp = FastMCP(SERVER_NAME, instructions=SERVER_INSTRUCTIONS)
     workspace = Workspace()
+    # Held so main() can clean up the temp tree on exit.
+    _LIVE_WORKSPACES.append(workspace)
 
     # -- 1. identity ---------------------------------------------------- #
     @mcp.tool()
@@ -187,7 +202,7 @@ def build_server():
                 {"session_id": digest, "cached": True, "path": str(cached)}
             )
 
-        out = workspace._root / digest
+        out = workspace.allocate(digest)
         jadx.decompile(apk_path, out_dir=out)
         workspace.remember(digest, out)
 
@@ -364,7 +379,14 @@ def main() -> None:  # pragma: no cover - entry point
         server = build_server()
     except ApkSmithError as exc:
         raise SystemExit(str(exc))
-    server.run()
+    try:
+        server.run()
+    finally:
+        # Decompiled output can run to hundreds of megabytes. Without this the
+        # temp tree survives an abnormal exit and quietly fills the disk.
+        for workspace in _LIVE_WORKSPACES:
+            workspace.cleanup()
+        _LIVE_WORKSPACES.clear()
 
 
 if __name__ == "__main__":  # pragma: no cover

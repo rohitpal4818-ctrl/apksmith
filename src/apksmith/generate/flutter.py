@@ -29,6 +29,37 @@ def _bullet_list(items: list[str], indent: str = "") -> str:
     return "".join(f"{indent}/// - {i}\n" for i in items)
 
 
+class _NameRegistry:
+    """Hands out file stems that are unique.
+
+    Three separate collisions are possible from model-supplied labels, and
+    each one silently produced two files at the same path -- the second
+    overwriting the first, so a screen vanished from the generated project
+    with no error at all:
+
+    1. the same name twice (``App List`` from two different partials)
+    2. names that collide once normalised (``App List`` and ``app_list``)
+    3. a name that shadows a file the generator emits itself (``Home``, which
+       would overwrite the entry screen)
+    """
+
+    def __init__(self, reserved: set[str] | None = None) -> None:
+        self._used: set[str] = set(reserved or set())
+
+    def unique(self, base: str) -> str:
+        candidate = base
+        suffix = 2
+        while candidate in self._used:
+            candidate = f"{base}_{suffix}"
+            suffix += 1
+        self._used.add(candidate)
+        return candidate
+
+
+#: Stems the generator emits itself, which a screen or model must not shadow.
+_BUILTIN_STEMS = {"home", "unknown_route"}
+
+
 def build_flutter_project(spec: BehaviourSpec) -> GenerationResult:
     """Generate a Flutter project from a behaviour specification."""
     if not spec.screens and not spec.features:
@@ -39,6 +70,7 @@ def build_flutter_project(spec: BehaviourSpec) -> GenerationResult:
         )
 
     result = GenerationResult()
+    stems = _NameRegistry(reserved=_BUILTIN_STEMS)
     app_class = f"{pascal(spec.app_name or spec.package or 'app')}App"
     project_name = snake(spec.app_name or spec.package or "reconstructed_app").replace(".", "_")
     title = spec.app_name or pascal(spec.package or "Reconstructed App")
@@ -58,7 +90,6 @@ def build_flutter_project(spec: BehaviourSpec) -> GenerationResult:
                                           app_class=app_class,
                                           title=dart_string(title)))
     add("lib/theme.dart", templates.render(templates.THEME_DART))
-    add("lib/router.dart", _routes_dart(spec, project_name))
     add("lib/screens/unknown_route_screen.dart",
         templates.render(templates.UNKNOWN_ROUTE_DART))
     add("test/widget_test.dart",
@@ -67,28 +98,38 @@ def build_flutter_project(spec: BehaviourSpec) -> GenerationResult:
     # ---- screens ---------------------------------------------------------- #
     screen_routes: list[tuple[str, str]] = []
     for screen in spec.screens:
-        class_name = f"{pascal(screen.name)}Screen"
-        route = f"/{snake(screen.name)}"
+        stem = stems.unique(snake(screen.name))
+        class_name = f"{pascal(stem)}Screen"
+        route = f"/{stem}"
         screen_routes.append((route, class_name))
         add(
-            f"lib/screens/{snake(screen.name)}_screen.dart",
-            _screen_dart(screen, class_name, project_name),
+            f"lib/screens/{stem}_screen.dart",
+            _screen_dart(screen, class_name, project_name, stem),
             origin="stub",
             note="screen shell from observed behaviour; logic is TODO",
         )
 
+    # ---- router ----------------------------------------------------------- #
+    # Emitted after the screens so every route resolves to a real class.
+    add("lib/router.dart", _routes_dart(screen_routes, app_class))
+
     # ---- home screen ------------------------------------------------------ #
-    add("lib/screens/home_screen.dart", _home_dart(spec, title, screen_routes, project_name))
+    add(
+        "lib/screens/home_screen.dart",
+        _home_dart(title, screen_routes, app_class, spec.purpose),
+    )
 
     # ---- data models ------------------------------------------------------ #
+    model_stems = _NameRegistry()
     for data in spec.data_stored:
         # `expenses` -> class `Expense`, file `expense.dart`. Applying the
         # singulariser before pascal() is what keeps all three in agreement.
-        class_name = pascal(singular(data.name))
+        stem = model_stems.unique(snake(singular(data.name)))
+        class_name = pascal(stem)
         add(
             # Name the file after the class, not the raw label, so
             # `expenses` produces `expense.dart` holding `class Expense`.
-            f"lib/models/{snake(class_name)}.dart",
+            f"lib/models/{stem}.dart",
             _model_dart(data.name, data.description, data.kind, class_name, spec.package),
             origin="stub",
             note="data class from observed storage; fields unknown",
@@ -112,30 +153,32 @@ def build_flutter_project(spec: BehaviourSpec) -> GenerationResult:
 # --------------------------------------------------------------------------- #
 # Individual file builders
 # --------------------------------------------------------------------------- #
-def _routes_dart(spec: BehaviourSpec, project_name: str) -> str:
+def _routes_dart(screen_routes: list[tuple[str, str]], app_class: str) -> str:
+    """Route table built from the already-unique stems.
+
+    Takes the stems rather than re-deriving them from the screen names, so the
+    route name, the file name and the class name cannot drift apart.
+    """
     consts = ["  static const home = '/';"]
     entries = ["    AppRoutes.home: (_) => const HomeScreen(),"]
 
-    for screen in spec.screens:
-        route = f"/{snake(screen.name)}"
-        class_name = f"{pascal(screen.name)}Screen"
-        consts.append(f"  static const {snake(screen.name)} = '{route}';")
-        entries.append(f"    AppRoutes.{snake(screen.name)}: (_) => const {class_name}(),")
+    for route, class_name in screen_routes:
+        stem = route.strip("/")
+        consts.append(f"  static const {stem} = '{route}';")
+        entries.append(f"    AppRoutes.{stem}: (_) => const {class_name}(),")
 
-    content = templates.render(
+    return templates.render(
         templates.ROUTES_DART,
-        package=spec.package,
         route_constants="\n".join(consts) + "\n",
         route_entries="\n".join(entries) + "\n",
     )
-    return content
 
 
 def _home_dart(
-    spec: BehaviourSpec,
     title: str,
     screen_routes: list[tuple[str, str]],
-    project_name: str,
+    app_class: str,
+    purpose: str,
 ) -> str:
     if screen_routes:
         tiles = []
@@ -154,14 +197,13 @@ def _home_dart(
 
     return templates.render(
         templates.HOME_DART,
-        package=spec.package,
         title=dart_string(title),
-        purpose=dart_string(_one_line(spec.purpose) or "Behaviour not determined."),
+        purpose=dart_string(_one_line(purpose) or "Behaviour not determined."),
         home_route_tiles=tile_source,
     )
 
 
-def _screen_dart(screen, class_name: str, project_name: str) -> str:
+def _screen_dart(screen, class_name: str, project_name: str, stem: str) -> str:
     shows = _bullet_list(screen.shows)
     actions = _bullet_list(screen.actions)
     evidence = ", ".join(screen.evidence) or "not recorded"
@@ -400,4 +442,5 @@ def _warnings(spec: BehaviourSpec) -> list[str]:
             "as a starting point, not a specification."
         )
     return warnings
+
 
