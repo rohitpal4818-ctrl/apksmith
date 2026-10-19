@@ -61,6 +61,10 @@ M2 through M5. The project now runs from an APK to a runnable project.
 
 ## [0.1.0] - 2026-10-18
 
+> Internal milestone, not a released tag. M1 through M5 were developed in a
+> single pass and first published as `v0.2.0`. This section is kept as a record
+> of what each stage contributed.
+
 M1. Static analysis and reporting.
 
 ### Added
@@ -84,5 +88,4 @@ M1. Static analysis and reporting.
   `APKSMITH_DEBUG=1`.
 
 [Unreleased]: https://github.com/YOUR-USERNAME/apksmith/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/YOUR-USERNAME/apksmith/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/YOUR-USERNAME/apksmith/releases/tag/v0.1.0
+[0.2.0]: https://github.com/YOUR-USERNAME/apksmith/releases/tag/v0.2.0
