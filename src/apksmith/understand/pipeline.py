@@ -33,7 +33,7 @@ from .prompt import (
     repair_prompt,
     synthesis_prompt,
 )
-from .rank import role_census, select
+from .rank import rank, role_census, select
 from .spec import BehaviourSpec, PartialSpec
 
 
@@ -258,6 +258,11 @@ def understand(
     summaries = extract_tree(decompiled_root, package_prefixes=prefixes)
     say(f"  {len(summaries):,} classes in the app's own package")
 
+    # Rank before taking the census. `role_census` reads `ClassSummary.role`,
+    # which only `rank()` populates, so taking it first made the diagnostic
+    # report {'other': N} for every app regardless of content -- actively
+    # misleading when you are trying to work out why a run looks wrong.
+    rank(summaries)
     census = role_census(summaries)
     selected = select(summaries, max_classes=max_classes, per_role_cap=per_role_cap)
     say(f"selected {len(selected)} for analysis; roles: {census}")

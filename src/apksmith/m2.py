@@ -163,8 +163,13 @@ def run(
         if tmp_dir and not keep_decompiled:
             import shutil
 
-            shutil.rmtree(tmp_dir.parent, ignore_errors=True)
-            typer.echo(f"cleaned up {tmp_dir.parent}")
+            # Remove OUR directory only. `tmp_dir.parent` is the system temp
+            # directory -- `mkdtemp(prefix=...)` returns
+            # <tempdir>/apksmith-m2-XXXX, so walking up one level and calling
+            # rmtree on it would delete every temp file on the user's machine.
+            # This ran on a real APK before it was caught.
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+            typer.echo(f"cleaned up {tmp_dir}")
 
 
 def _write(path: Path, content: str) -> None:

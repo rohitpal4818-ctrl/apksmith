@@ -1,0 +1,573 @@
+{
+  "app_name": "F-Droid",
+  "package": "org.fdroid.fdroid",
+  "purpose": "F-Droid is an installable catalogue of FOSS (Free and Open Source Software) applications for Android, allowing users to browse, install, and update apps from multiple repositories, including peer-to-peer nearby sharing without internet.",
+  "target_users": "Android users who prefer free and open source software, privacy-conscious users, and developers distributing FOSS apps.",
+  "screens": [
+    {
+      "name": "Onboarding flows",
+      "purpose": "Show first-time guidance for main app areas, updates, filters, repositories, repo details, app issues, and anti-features",
+      "shows": [
+        "Contextual tips or overlays for each onboarding topic"
+      ],
+      "actions": [
+        "Dismiss onboarding once seen",
+        "Progress through multiple onboarding steps"
+      ],
+      "evidence": [
+        "org.fdroid.settings.OnboardingManager"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Main app screen",
+      "purpose": "Entry point that initializes settings and notification managers, handles intents and permission requests; provides tabbed navigation to Discover, Search, My Apps, and Repositories",
+      "shows": [
+        "Tab bar with Discover, Search, My Apps, Repositories",
+        "App list (implied)",
+        "Onboarding (implied)"
+      ],
+      "actions": [
+        "Launch app",
+        "Handle new intents",
+        "Request POST_NOTIFICATIONS permission",
+        "Navigate between tabs"
+      ],
+      "evidence": [
+        "org.fdroid.MainActivity",
+        "org.fdroid.ui.navigation.NavigationKey"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "App list screen",
+      "purpose": "Displays filterable, sortable list of apps from repositories with category, anti-feature, and repository filters; supports drag-and-drop reordering of items",
+      "shows": [
+        "App list items with icons, names, summaries",
+        "Filter controls (categories, anti-features, repositories, incompatible toggle)",
+        "Sort options",
+        "Draggable list items with visual feedback"
+      ],
+      "actions": [
+        "Load apps",
+        "Toggle filter visibility",
+        "Sort list",
+        "Toggle incompatible filter",
+        "Add/remove category filter",
+        "Add/remove repository filter",
+        "Drag item to new position",
+        "Drop to reorder",
+        "Auto-scroll while dragging near edges"
+      ],
+      "evidence": [
+        "org.fdroid.ui.lists.AppListViewModel",
+        "org.fdroid.ui.utils.DragDropState",
+        "org.fdroid.ui.navigation.NavigationKey"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "App details screen",
+      "purpose": "Show detailed information about an app including description, screenshots, versions, and install actions",
+      "shows": [
+        "App icon and feature graphic",
+        "Description and summary",
+        "Phone screenshots",
+        "Categories",
+        "Available versions",
+        "Install/update/uninstall actions",
+        "Anti-features",
+        "Author info",
+        "Issue tracker link",
+        "Proxy info"
+      ],
+      "actions": [
+        "Install or update app",
+        "View version history",
+        "Open issue tracker",
+        "Share app",
+        "View anti-features"
+      ],
+      "evidence": [
+        "org.fdroid.ui.details.LoadedAppDetailsItem",
+        "org.fdroid.ui.navigation.NavigationKey"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Add Repository Preview",
+      "purpose": "Shows a preview of a repository's apps and metadata before the user confirms adding it",
+      "shows": [
+        "Repository name",
+        "App list with names, package names, summaries, and icons",
+        "Repo ID"
+      ],
+      "actions": [
+        "Confirm adding the repository",
+        "Cancel"
+      ],
+      "evidence": [
+        "org.fdroid.ui.repositories.add.AddRepoPreviewScreenKt"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Repositories list",
+      "purpose": "Manage configured repositories: enable/disable, reorder, add new, edit details",
+      "shows": [
+        "List of repositories with name, address, enabled state",
+        "Mirror lists",
+        "Drag-and-drop reordering"
+      ],
+      "actions": [
+        "Enable/disable repository",
+        "Reorder repositories",
+        "Add new repository",
+        "Edit repository details"
+      ],
+      "evidence": [
+        "org.fdroid.ui.navigation.NavigationKey",
+        "org.fdroid.ui.utils.DragDropState"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "name": "Nearby swap start",
+      "purpose": "Let the user enable Bluetooth or Wi-Fi Direct, see nearby peers, and initiate an app swap session",
+      "shows": [
+        "Bluetooth toggle switch",
+        "Current Wi-Fi network name",
+        "List of nearby peers with device names",
+        "Progress indicator while scanning"
+      ],
+      "actions": [
+        "Turn Bluetooth swap on/off",
+        "Refresh peer list",
+        "Select a peer to start swap"
+      ],
+      "evidence": [
+        "org.fdroid.fdroid.nearby.StartSwapView",
+        "org.fdroid.fdroid.views.main.NearbyViewBinder"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Nearby app selection",
+      "purpose": "Let the user pick installed apps to share with a nearby device via the swap workflow",
+      "shows": [
+        "List of installed apps with checkboxes",
+        "Search/filter field"
+      ],
+      "actions": [
+        "Tap to toggle app selection",
+        "Filter list by name"
+      ],
+      "evidence": [
+        "org.fdroid.fdroid.nearby.SelectAppsView"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Nearby Swap",
+      "purpose": "Guide the user through discovering nearby devices via Bluetooth and exchanging apps or repositories",
+      "shows": [
+        "Bluetooth permission requests",
+        "Device discovery progress",
+        "Swap configuration confirmation",
+        "Next/back navigation"
+      ],
+      "actions": [
+        "Enable Bluetooth",
+        "Make device discoverable",
+        "Confirm swap parameters",
+        "Proceed to next step",
+        "Cancel swap"
+      ],
+      "evidence": [
+        "org.fdroid.fdroid.nearby.SwapWorkflowActivity"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Swap Success",
+      "purpose": "Display apps received from a nearby swap and let the user install them",
+      "shows": [
+        "List of received apps with install state",
+        "App icons and metadata",
+        "Install buttons"
+      ],
+      "actions": [
+        "Install received apps",
+        "Confirm installation",
+        "View app details"
+      ],
+      "evidence": [
+        "org.fdroid.ui.nearby.SwapSuccessViewModel"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Panic screen",
+      "purpose": "Provides an emergency exit or privacy feature that can be triggered to quickly hide the app or show a panic dialog",
+      "shows": [
+        "Panic dialog",
+        "Settings for panic behavior"
+      ],
+      "actions": [
+        "Trigger panic mode",
+        "Configure panic settings",
+        "Handle incoming panic intents"
+      ],
+      "evidence": [
+        "org.fdroid.ui.panic.PanicActivity"
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Panic settings",
+      "purpose": "Configure panic mode behavior including hiding the app, exiting the app, and resetting repositories",
+      "shows": [
+        "Toggle for hide app",
+        "Toggle for exit app",
+        "Toggle for reset repos",
+        "App icon selector"
+      ],
+      "actions": [
+        "Enable/disable hide app",
+        "Enable/disable exit app",
+        "Enable/disable reset repos",
+        "Change app icon"
+      ],
+      "evidence": [
+        "org.fdroid.ui.panic.PanicSettingsViewModel"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "features": [
+    {
+      "name": "Nearby Bluetooth app swap",
+      "description": "Exchange apps and repositories with nearby devices over Bluetooth without internet",
+      "implemented": true
+    },
+    {
+      "name": "Crash reporting",
+      "description": "Automatic crash collection and reporting via ACRA",
+      "implemented": true
+    },
+    {
+      "name": "Repository management",
+      "description": "Configure and manage multiple app repositories with mirrors, certificates, and priorities",
+      "implemented": true
+    },
+    {
+      "name": "App installation management",
+      "description": "Handle installation, update, and uninstallation of apps from repositories",
+      "implemented": true
+    },
+    {
+      "name": "Repository index parsing (v1 and v2)",
+      "description": "Parse and serialize F-Droid repository index formats (v1 legacy and v2 current)",
+      "implemented": true
+    },
+    {
+      "name": "App metadata storage",
+      "description": "Stores detailed app information including author, links, changelog, license, and localized text/assets",
+      "implemented": true
+    },
+    {
+      "name": "Local repo HTTPS certificate management",
+      "description": "Generates and manages a keystore with self-signed certificates for serving a local F-Droid repo over HTTPS during nearby share",
+      "implemented": true
+    },
+    {
+      "name": "Panic mode configuration",
+      "description": "Allows user to set actions triggered by panic gesture: hide app from launcher, exit app, wipe repo configuration",
+      "implemented": true
+    },
+    {
+      "name": "Drag and drop reordering",
+      "description": "Enables reordering items in a Compose LazyList with animated drag preview and auto-scroll",
+      "implemented": true
+    },
+    {
+      "name": "App metadata model",
+      "description": "Represents an app with package name, version codes, install status, and update availability",
+      "implemented": true
+    },
+    {
+      "name": "Repository database operations",
+      "description": "CRUD and reordering for configured F-Droid repositories",
+      "implemented": true
+    },
+    {
+      "name": "App list UI state",
+      "description": "Holds filtered/sorted app list, categories, anti-features, and filter badges for the main browse screen",
+      "implemented": true
+    },
+    {
+      "name": "Index v2 metadata serialization",
+      "description": "Kotlin serialization for repository index v2 fields (name, summary, description, license, source, issue tracker, etc.)",
+      "implemented": true
+    },
+    {
+      "name": "Index v2 screenshot model",
+      "description": "Stores screenshots for multiple device form factors (phone, 7-inch, 10-inch, wear, TV)",
+      "implemented": true
+    },
+    {
+      "name": "APK file sharing via ContentProvider",
+      "description": "Exposes APK files via a ContentProvider so other apps can send/install APKs shared by F-Droid",
+      "implemented": true
+    },
+    {
+      "name": "Nearby app swap tracking",
+      "description": "Models the result of a successful nearby app swap, including package details, version info, compatibility, and install state",
+      "implemented": true
+    },
+    {
+      "name": "Resumable file downloader",
+      "description": "Downloads files (indexes, APKs) with support for resume, progress reporting, cancellation, and integrity verification",
+      "implemented": true
+    },
+    {
+      "name": "Package version serialization",
+      "description": "Serializes/deserializes PackageVersionV2 objects for index v2 format, including metadata like anti-features, release channels, and signer info",
+      "implemented": true
+    },
+    {
+      "name": "App database",
+      "description": "Room database storing app metadata, localized files, and full-text search index for apps across repositories",
+      "implemented": true
+    },
+    {
+      "name": "Full-text search",
+      "description": "FTS entity for searching apps by name, summary, description, author, and package name",
+      "implemented": true
+    },
+    {
+      "name": "Repository preview before adding",
+      "description": "Displays a list of apps from a repository with details so the user can decide whether to add it",
+      "implemented": true
+    },
+    {
+      "name": "Bluetooth HTTP-like request/response protocol",
+      "description": "Implements GET and HEAD request handling over a Bluetooth connection for nearby app exchange",
+      "implemented": true
+    },
+    {
+      "name": "Repository manifest V2 serialization",
+      "description": "Serializes and deserializes repository index manifests containing version info, permissions, features, and SDK requirements",
+      "implemented": true
+    },
+    {
+      "name": "Updatable app tracking",
+      "description": "Tracks installed apps that have updates available, including version info, repo source, and vulnerability status",
+      "implemented": true
+    },
+    {
+      "name": "Onboarding state management",
+      "description": "Persists onboarding visibility state per feature using SharedPreferences, with legacy migration",
+      "implemented": true
+    },
+    {
+      "name": "Repository configuration from swap intent",
+      "description": "Parses incoming intents or URIs to extract repository details (host, credentials, fingerprint, Wi-Fi BSSID/SSID) for adding a repo received via nearby share",
+      "implemented": true
+    },
+    {
+      "name": "Notification channels and alerts",
+      "description": "Creates dedicated notification channels and shows/cancels notifications for app installs, install success, repo updates, available app updates, and self-updates",
+      "implemented": true
+    },
+    {
+      "name": "Flexible download requests",
+      "description": "Models download requests with support for multiple mirrors, proxy configuration, authentication, IPFS CIDs, and integrity verification (SHA256, size)",
+      "implemented": true
+    },
+    {
+      "name": "Type-safe navigation",
+      "description": "Provides sealed navigation keys for Discover, Search, MyApps, Repos, AppList, and AppDetails destinations",
+      "implemented": true
+    }
+  ],
+  "data_stored": [
+    {
+      "name": "Repository configurations",
+      "kind": "database",
+      "description": "Repository metadata including name, address, mirrors, description, certificate, version, enabled state, and weight"
+    },
+    {
+      "name": "App settings",
+      "kind": "preferences",
+      "description": "User preferences managed via SettingsManager"
+    },
+    {
+      "name": "Installed apps cache",
+      "kind": "cache",
+      "description": "Cache of currently installed apps for compatibility checking and swap operations"
+    },
+    {
+      "name": "App and AppMetadata entities",
+      "kind": "database",
+      "description": "Room entities holding app package info, metadata (author, website, license, changelog, source code, issue tracker, donation links), and localized files (icons, screenshots, videos)"
+    },
+    {
+      "name": "Local repo keystore",
+      "kind": "file",
+      "description": "BKS keystore file (kerplapp.bks) containing self-signed certificate and key pair for HTTPS local repo server"
+    },
+    {
+      "name": "Panic settings",
+      "kind": "preferences",
+      "description": "SharedPreferences flags for hideApp, exitApp, resetRepos, and custom app icon selection"
+    },
+    {
+      "name": "Repository list",
+      "kind": "database",
+      "description": "Enabled/disabled repositories, their URLs, mirror lists, and display order"
+    },
+    {
+      "name": "App index metadata",
+      "kind": "database",
+      "description": "Parsed v1/v2 index data including localized strings, screenshots, changelogs, licenses"
+    },
+    {
+      "name": "Downloaded file cache",
+      "kind": "cache",
+      "description": "Temporary storage for downloaded index files or APKs during download operations"
+    },
+    {
+      "name": "APK files for sharing",
+      "kind": "file",
+      "description": "APK files exposed via ContentProvider for sending to other apps or installation"
+    },
+    {
+      "name": "AppMetadataFts",
+      "kind": "database",
+      "description": "Full-text search index: repoId, name, summary, description, authorName, packageName"
+    },
+    {
+      "name": "Repository index manifests (V2)",
+      "kind": "database",
+      "description": "Parsed manifest data including versionName, versionCode, usesSdk, maxSdkVersion, signer, usesPermission, usesPermissionSdk23, nativecode, features, minSdkVersion, featureNames"
+    },
+    {
+      "name": "Onboarding preferences",
+      "kind": "preferences",
+      "description": "Boolean flags for each onboarding flow (main, updates, filter, repositories, repo details, app issues, anti-features)"
+    },
+    {
+      "name": "LocalizedFileList",
+      "kind": "database",
+      "description": "Room entity holding localized metadata for repo files: repoId, packageName, type, locale, name, sha256, size, ipfsCidV1"
+    },
+    {
+      "name": "Repository V2 metadata",
+      "kind": "database",
+      "description": "Persisted repository configuration including name, icon, address, web URL, description, mirrors, timestamp, categories, release channels, and anti-features"
+    },
+    {
+      "name": "Onboarding and settings state",
+      "kind": "preferences",
+      "description": "Tracks onboarding completion and user preferences such as metered network warnings"
+    }
+  ],
+  "network_calls": [
+    {
+      "purpose": "Fetch repository indexes and app metadata from configured repositories",
+      "endpoint": "Multiple repository URLs (e.g., https://f-droid.org, https://apt.izzysoft.de/fdroid/repo, https://archive.newpipe.net/fdroid/repo, https://briarproject.org/fdroid/repo, https://guardianproject.info/fdroid/repo, IPFS gateways)",
+      "method": "GET",
+      "evidence": [
+        "org.fdroid.index.v1.PackageV1$$serializer",
+        "org.fdroid.index.v2.RepoV2$$serializer",
+        "string literals in static analysis"
+      ]
+    },
+    {
+      "purpose": "Download APKs, index files, or other assets over HTTP/HTTPS with resume support",
+      "endpoint": "Dynamic (repository URLs and mirror URLs)",
+      "method": "GET",
+      "evidence": [
+        "org.fdroid.download.Downloader",
+        "org.fdroid.download.HttpDownloader",
+        "org.fdroid.download.HttpDownloaderV2",
+        "org.fdroid.download.DownloadRequest"
+      ]
+    },
+    {
+      "purpose": "Exchange app metadata and APKs over Bluetooth using a custom HTTP-like protocol",
+      "endpoint": "Bluetooth RFCOMM",
+      "method": "GET|HEAD",
+      "evidence": [
+        "org.fdroid.fdroid.nearby.httpish.Request"
+      ]
+    }
+  ],
+  "permissions_justified": {
+    "android.permission.CAMERA": "Used by CaptureActivity for QR code scanning (e.g., scanning repository QR codes or app share codes)",
+    "android.permission.MANAGE_EXTERNAL_STORAGE": "Required for reading/writing APK files and repository indexes to shared storage, and for USB OTG directory picking via OPEN_DOCUMENT_TREE",
+    "android.permission.REQUEST_INSTALL_PACKAGES": "Allows installation of downloaded APKs from repositories, nearby shares, and local repo server",
+    "android.permission.QUERY_ALL_PACKAGES": "Needed to query installed apps for compatibility checking, swap operations, and displaying installed app list",
+    "android.permission.READ_EXTERNAL_STORAGE": "Reads APK files, repository indexes, and keystore from storage (legacy permission, still declared for compatibility)",
+    "android.permission.WRITE_EXTERNAL_STORAGE": "Writes downloaded APKs, indexes, and keystore to storage (legacy permission, still declared for compatibility)"
+  },
+  "platform_dependencies": [
+    "Android Keystore / BouncyCastle provider for certificate generation",
+    "Android POST_NOTIFICATIONS permission (API 33+)",
+    "Android SharedPreferences",
+    "Bluetooth (for nearby sharing and swap)",
+    "BluetoothAdapter for nearby swap",
+    "Camera (for QR code scanning via CaptureActivity)",
+    "ContentProvider framework (for APK sharing)",
+    "Coroutines for async download",
+    "Kotlinx Serialization",
+    "OkHttp (via HttpManager)",
+    "PackageManager for installed app queries and component enabled state (panic hide/exit)",
+    "Room database",
+    "Storage access (READ/WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE)",
+    "USB OTG support for external storage",
+    "Wi-Fi Direct / WifiManager for network peer discovery",
+    "android.intent.action.OPEN_DOCUMENT_TREE for directory picking",
+    "android.permission.ACCESS_COARSE_LOCATION for nearby discovery",
+    "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION for scoped storage",
+    "WorkManager",
+    "ACRA",
+    "Glide"
+  ],
+  "caveats": [
+    "Actual repository URLs and download triggers are not in these classes",
+    "AppDetailsItem parent class not provided, so some fields inferred",
+    "AppDetailsViewModel references many injected dependencies (RepoManager, UpdateChecker, etc.) whose implementations are not provided",
+    "AppListModel is a UI state holder; the actual app list rendering and repository browsing screens are not in this part",
+    "AppListViewModel references AppListType and RepoManager but their implementations are not in this part",
+    "AppV1 serializer indicates legacy index format support but not whether v1 repos are still used",
+    "Database schema for repositories not fully shown",
+    "DownloadRequest is a data model; the actual HTTP/IPFS download execution code is not in this class",
+    "Downloader's specific network endpoints are not hardcoded in this class",
+    "DragDropState usage context (which list) not determined from this class alone",
+    "Entry$$serializer is compiler-generated; the Entry data class itself not provided",
+    "Exact UI layout of AddRepoPreviewScreen not fully known (only Compose component names and string literals)",
+    "Full swap workflow steps beyond the activity and viewmodel not visible",
+    "HttpDownloader's exact usage contexts (repo index vs APK) not specified in this snippet",
+    "Integration between nearby Bluetooth protocol and the ContentProvider is inferred but not fully traced",
+    "MainActivity body is truncated; exact UI composition not visible",
+    "NavigationKey only defines keys; the navigation graph and fragment/activity destinations are not shown",
+    "Network call details inferred from string literals in static analysis, not directly from these 6 classes",
+    "Network endpoints from strings list not directly referenced in these six classes",
+    "NewRepoConfig references SwapWorkflowActivity.EXTRA_PREVENT_FURTHER_SWAP_REQUESTS but that activity not in this part",
+    "No network endpoints directly invoked in these classes",
+    "NotificationManager uses NotificationManagerCompat but actual notification content templates not shown",
+    "Only the StartSwapView UI class is shown; the actual swap transfer logic resides in SwapService and related classes not included here",
+    "PackageVersionV2 serializer is for Kotlin serialization; actual parsing logic elsewhere",
+    "PanicActivity's exact UI and trigger mechanism not fully visible from decompiled snippet",
+    "PanicSettingsViewModel references OnboardingManager and AppIconManager but their implementations not shown",
+    "PreviewUtilsKt only shows test constants; production preview logic not shown",
+    "SelectAppsView extends SwapView but SwapView implementation not provided; exact swap transport unknown",
+    "Serializer classes are compiler-generated; the actual data classes are not included",
+    "Serializers are compiler-generated; the actual index download and parsing flow is not visible",
+    "SwapSuccessItem is a model only; the swap UI/flow is in other classes not provided",
+    "The actual Nearby discovery protocol implementation (Bluetooth/Wi-Fi Direct) is not shown in NearbyViewBinder; only the UI binding and permission handling",
+    "UI screens for onboarding not shown in these classes; only the state manager is present"
+  ]
+}

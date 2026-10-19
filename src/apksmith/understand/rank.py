@@ -192,8 +192,14 @@ def select(
 
 
 def role_census(summaries: list[ClassSummary]) -> dict[str, int]:
-    """How many classes fall into each role. Useful for a sanity check."""
+    """How many classes fall into each role.
+
+    Ranks first, so calling this on freshly extracted summaries is safe. Doing
+    it the other way round silently reports every class as "other", because
+    `role` is not populated until `rank()` runs.
+    """
+    rank(summaries)
     counts: dict[str, int] = {}
     for s in summaries:
         counts[s.role] = counts.get(s.role, 0) + 1
-    return counts
+    return dict(sorted(counts.items(), key=lambda kv: -kv[1]))
