@@ -114,15 +114,33 @@ def analyse(
 
 
 def coverage_notes() -> list[str]:
-    """What M1 does *not* do. Printed by the CLI so nobody over-trusts it."""
+    """What this tool does *not* do.
+
+    Printed by `apksmith coverage` and surfaced as the `apk_coverage` MCP tool.
+    A reconstruction tool that overstates its reach is worse than one that
+    admits its limits, so this list is deliberately blunt and lives in one
+    place rather than being paraphrased in several places.
+    """
     return [
+        "Cannot recover original source. Decompilation is lossy: comments, "
+        "variable names and structure are gone before the APK is readable. "
+        "The output is a reimplementation of observed behaviour, not a copy.",
         "String-pool matching is not dataflow analysis. A present string is "
-        "not proof a code path reaches it.",
-        "No dynamic analysis. Runtime behaviour, Frida hooks and traffic are "
-        "out of scope for M1.",
-        "Native (.so) libraries are inventoried but not analysed.",
-        "Packed or obfuscated APKs will under-report. Check the "
-        "short_name_ratio metric to see how much signal you are getting.",
-        "Manifest findings are high confidence; code-derived findings are "
-        "medium at best and carry their evidence for manual verification.",
+        "not proof a code path reaches it. Code-derived findings are capped "
+        "at medium confidence and carry their evidence for manual checking.",
+        "No dynamic analysis. Runtime behaviour, network traffic, Frida hooks "
+        "and anything decided at runtime are invisible.",
+        "Native (.so) libraries are inventoried but not analysed. Code in "
+        "them cannot be decompiled to source at all.",
+        "Generated projects are scaffolds. Structure, routing, theme and data "
+        "models are real; screen behaviour, state and business rules are TODO "
+        "in every file.",
+        "Packed or obfuscated APKs under-report. The short_name_ratio metric "
+        "shows how much signal the analysis is actually getting.",
+        "M2 has never been run against a live model. Its prompt and parsing "
+        "paths are covered by tests using a stub, but real free-model "
+        "behaviour is unverified.",
+        "The evaluation suite covers two apps and measures agreement with "
+        "hand-written references. Treat its numbers as a regression signal, "
+        "not a benchmark.",
     ]

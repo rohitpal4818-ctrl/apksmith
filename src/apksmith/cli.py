@@ -84,7 +84,7 @@ def scan(
 @cli.command()
 def coverage() -> None:
     """Print what this tool does not do."""
-    typer.echo("APKSmith M1 coverage limits\n")
+    typer.echo("APKSmith coverage limits\n")
     for note in coverage_notes():
         typer.echo(f"  - {note}")
     typer.echo("")
