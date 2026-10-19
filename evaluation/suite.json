@@ -1,0 +1,123 @@
+{
+  "_comment": [
+    "Reference suite for M5 evaluation.",
+    "",
+    "The 'reference' blocks were written by hand from each app's public",
+    "documentation and store listing. They are NOT derived from any model.",
+    "That independence is the whole point: comparing model output against a",
+    "model-authored reference would measure nothing.",
+    "",
+    "The 'spec' blocks are placeholder pipelines. Replace them with real",
+    "output from `apksmith understand` once an OPENROUTER_API_KEY is set."
+  ],
+  "cases": [
+    {
+      "name": "F-Droid",
+      "reference": {
+        "purpose": "A free software catalogue for Android. Browse, install and track updates for open source apps from multiple repositories without using Google's proprietary store.",
+        "target_users": "People who want to install open source Android software and avoid closed app stores.",
+        "screens": [
+          "App list",
+          "App details",
+          "Repositories settings",
+          "Preferences",
+          "Updates",
+          "Search results",
+          "Installed apps"
+        ],
+        "features": [
+          "Browse apps by category",
+          "Search apps",
+          "Install and uninstall apps",
+          "Track available updates",
+          "Manage multiple repositories",
+          "Share apps via links",
+          "Build apps from source",
+          "View app permissions"
+        ],
+        "data_stored": [
+          "installed apps",
+          "repository URLs",
+          "category preferences",
+          "theme preference",
+          "update history"
+        ],
+        "network_calls": [
+          "fetch repository index",
+          "download APK files",
+          "check for updates",
+          "report crashes"
+        ]
+      },
+      "spec": {
+        "app_name": "F-Droid",
+        "package": "org.fdroid.fdroid",
+        "purpose": "A free software catalogue for Android. Browse, install and track updates for open source apps from multiple repositories without using Google's proprietary store.",
+        "target_users": "People who want to install open source Android software and avoid closed app stores.",
+        "screens": [
+          {"name": "App List", "purpose": "Browse apps", "confidence": "high", "evidence": ["MainActivity"]},
+          {"name": "App Details", "purpose": "See app info", "confidence": "high", "evidence": ["AppDetailsActivity"]},
+          {"name": "Search", "purpose": "Search apps", "confidence": "high", "evidence": ["SearchActivity"]},
+          {"name": "Settings", "purpose": "Preferences", "confidence": "medium", "evidence": ["SettingsActivity"]},
+          {"name": "Updates", "purpose": "Track updates", "confidence": "high", "evidence": ["UpdatesActivity"]},
+          {"name": "Install", "purpose": "Install apps", "confidence": "high", "evidence": ["InstallActivity"]},
+          {"name": "Donate", "purpose": "Donate to F-Droid", "confidence": "high", "evidence": ["DonateActivity"]},
+          {"name": "Categories", "purpose": "Browse by category", "confidence": "medium", "evidence": ["CategoriesActivity"]}
+        ],
+        "features": [
+          {"name": "Browse apps by category", "description": "Filter the catalogue", "implemented": true},
+          {"name": "Search apps", "description": "Full text search", "implemented": true},
+          {"name": "Install and uninstall apps", "description": "", "implemented": true},
+          {"name": "Track available updates", "description": "", "implemented": true},
+          {"name": "Manage multiple repositories", "description": "Add and remove repos", "implemented": true},
+          {"name": "Report crashes", "description": "Via ACRA", "implemented": true},
+          {"name": "QR code scanner", "description": "Scan repo URLs", "implemented": true},
+          {"name": "Tor support", "description": "", "implemented": true},
+          {"name": "Nearby transfers", "description": "WiFi transfer", "implemented": true},
+          {"name": "View app permissions", "description": "", "implemented": false}
+        ],
+        "data_stored": [
+          {"name": "installed apps", "kind": "database", "description": ""},
+          {"name": "settings", "kind": "preferences", "description": ""}
+        ],
+        "network_calls": [
+          {"purpose": "fetch repo index", "endpoint": "https://f-droid.org/repo/index.xml", "method": "GET", "evidence": []},
+          {"purpose": "download apks", "endpoint": "", "method": "GET", "evidence": []},
+          {"purpose": "report crashes", "endpoint": "", "method": "POST", "evidence": []}
+        ],
+        "caveats": ["Screen set inferred from class names"]
+      }
+    },
+    {
+      "name": "Simple expense tracker",
+      "reference": {
+        "purpose": "Record daily expenses and see a monthly total. No bank connection, no account required.",
+        "screens": ["Expense list", "Add expense", "Settings"],
+        "features": ["Add an expense", "Delete an expense", "Monthly total", "Filter by category"],
+        "data_stored": ["expenses", "settings"]
+      },
+      "spec": {
+        "app_name": "Ledgerly",
+        "package": "com.example.ledgerly",
+        "purpose": "Record daily expenses and see a monthly total. No bank connection, no account required.",
+        "screens": [
+          {"name": "Expense List", "purpose": "See all expenses", "confidence": "high", "evidence": ["ExpenseListActivity"]},
+          {"name": "Add Expense", "purpose": "Record an expense", "confidence": "high", "evidence": ["AddExpenseActivity"]},
+          {"name": "Settings", "purpose": "App settings", "confidence": "low", "evidence": ["SettingsActivity"]}
+        ],
+        "features": [
+          {"name": "Add an expense", "description": "", "implemented": true},
+          {"name": "Delete an expense", "description": "", "implemented": true},
+          {"name": "Monthly total", "description": "Sums the month", "implemented": true},
+          {"name": "Filter by category", "description": "", "implemented": false}
+        ],
+        "data_stored": [
+          {"name": "expenses", "kind": "database", "description": ""},
+          {"name": "settings", "kind": "preferences", "description": ""}
+        ],
+        "network_calls": [],
+        "caveats": []
+      }
+    }
+  ]
+}

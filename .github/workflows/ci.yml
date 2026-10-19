@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test on ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Test
+        run: pytest --cov=apksmith --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+
+  integration:
+    name: integration (real APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Fetch the sample APK
+        run: bash scripts/fetch_samples.sh
+
+      - name: Install jadx
+        run: |
+          JADX_VERSION=1.5.6
+          curl -L -o jadx.zip \
+            "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"
+          unzip -q jadx.zip
+          echo "$PWD/jadx-${JADX_VERSION}/bin" >> "$GITHUB_PATH"
+
+      - name: Static analysis on a real APK
+        run: |
+          python -m apksmith scan samples/F-Droid.apk \
+            --json reports/f-droid.json \
+            --markdown reports/f-droid.md \
+            --top 0 || true
+
+      - name: The report must be sane
+        # A legitimate open-source app must not trip the false-positive filter.
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          report = json.loads(pathlib.Path("reports/f-droid.json").read_text())
+          score = report["risk_score"]
+          print(f"risk_score = {score}")
+          assert report["identity"]["package"] == "org.fdroid.fdroid", "wrong package"
+          assert report["metrics"]["total_classes"] > 1000, "DEX not parsed"
+          assert len(report["components"]) > 10, "components not parsed"
+          assert score < 95, f"risk score {score} suggests false positives"
+          print("ok")
+          PY
+
+      - name: Decompile
+        run: python -m apksmith understand run samples/F-Droid.apk --dry-run
+
+      - name: Generate a Flutter project (proves M3 needs no API key)
+        run: |
+          python -m apksmith generate run evaluation/example_spec.json --out build/recon
+          test -f build/recon/pubspec.yaml
+          test -f build/recon/lib/router.dart
+
+      - name: Generated project must be structurally sound
+        run: |
+          python - <<'PY'
+          import pathlib, re, sys
+          root = pathlib.Path("build/recon")
+          files = sorted(root.rglob("*.dart"))
+          assert files, "no Dart generated"
+          for f in files:
+              text = f.read_text()
+              assert "{{" not in text, f"{f}: unsubstituted placeholder"
+              # Strip string literals before comments: a URL contains "//".
+              s = re.sub(r'"(?:[^"\\\n]|\\.)*"', "@@", text)
+              s = re.sub(r"'(?:[^'\\\n]|\\.)*'", "@@", s)
+              s = re.sub(r"//[^\n]*", "", s)
+              assert s.count("{") == s.count("}"), f"{f}: unbalanced braces"
+          print(f"{len(files)} Dart files, braces balanced")
+          PY
+
+      - name: Evaluation suite runs
+        run: python -m apksmith evaluate run evaluation/suite.json
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-reports
+          path: reports/
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Ruff
+        run: |
+          ruff check src tests
+          ruff format --check src tests

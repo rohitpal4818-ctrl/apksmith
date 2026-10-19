@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apksmith"
+version = "0.1.0"
+description = "Static analysis and behaviour extraction from Android APKs."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Rohit" }]
+keywords = ["android", "apk", "reverse-engineering", "static-analysis", "security"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+]
+
+dependencies = [
+    "androguard>=4.1",
+    "pydantic>=2.7",
+    "typer>=0.12",
+    "rich>=13.0",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "mcp>=1.0"]
+
+[project.scripts]
+apksmith = "apksmith.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/YOUR-USERNAME/apksmith"
+Repository = "https://github.com/YOUR-USERNAME/apksmith"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"

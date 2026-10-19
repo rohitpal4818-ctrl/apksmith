@@ -1,0 +1,96 @@
+{
+  "_comment": [
+    "A complete BehaviourSpec, used to exercise M3 in CI without needing an",
+    "OpenRouter key. It is shaped exactly like the output of",
+    "`apksmith understand run app.apk --json spec.json`.",
+    "",
+    "The content describes a hypothetical expense tracker. It is deliberately",
+    "not derived from any real app, and not from any model."
+  ],
+  "app_name": "Ledgerly",
+  "package": "com.example.ledgerly",
+  "purpose": "A simple expense tracker for people who want to see where their money went this month, without connecting a bank account.",
+  "target_users": "People who want a plain expense log and a monthly total.",
+  "screens": [
+    {
+      "name": "Expense List",
+      "purpose": "See every recorded expense for the current month",
+      "shows": [
+        "one row per expense",
+        "expense category icon",
+        "monthly total",
+        "add expense button"
+      ],
+      "actions": [
+        "add an expense",
+        "delete an expense",
+        "filter by category"
+      ],
+      "evidence": ["ExpenseListActivity", "ExpenseAdapter", "MonthTotalView"],
+      "confidence": "high"
+    },
+    {
+      "name": "Add Expense",
+      "purpose": "Record a new expense",
+      "shows": ["amount field", "category picker", "date picker", "save button"],
+      "actions": ["enter an amount", "choose a category", "save"],
+      "evidence": ["AddExpenseActivity", "CategoryPicker"],
+      "confidence": "medium"
+    },
+    {
+      "name": "Settings",
+      "purpose": "Change currency and theme",
+      "shows": ["currency selector", "dark mode toggle"],
+      "actions": ["change currency", "toggle dark mode"],
+      "evidence": ["SettingsActivity"],
+      "confidence": "low"
+    }
+  ],
+  "features": [
+    {
+      "name": "Monthly total",
+      "description": "Sums the current month's expenses",
+      "implemented": true
+    },
+    {
+      "name": "Delete an expense",
+      "description": "Removes a single row",
+      "implemented": true
+    },
+    {
+      "name": "Category breakdown",
+      "description": "Per-category totals",
+      "implemented": false
+    }
+  ],
+  "data_stored": [
+    {
+      "name": "expenses",
+      "kind": "database",
+      "description": "amount, category and date per entry"
+    },
+    {
+      "name": "settings",
+      "kind": "preferences",
+      "description": "currency and theme"
+    }
+  ],
+  "network_calls": [
+    {
+      "purpose": "Back up expenses to the user's own bucket",
+      "endpoint": "https://api.example.test/v1/backup",
+      "method": "POST",
+      "evidence": ["BackupService", "https://api.example.test/v1/backup"]
+    }
+  ],
+  "permissions_justified": {
+    "android.permission.INTERNET": "Sends backups to the configured server."
+  },
+  "platform_dependencies": [
+    "local storage for the expense database"
+  ],
+  "caveats": [
+    "Category breakdown appears stubbed in the original and may be dead code.",
+    "The Settings screen was inferred at low confidence and needs hand-checking."
+  ]
+}

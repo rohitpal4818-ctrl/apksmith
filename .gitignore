@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Tooling
+.mypy_cache/
+.ruff_cache/
+
+# Local scratch output (sample reports ARE committed)
+out/
+
+# Test fixtures are large binaries; fetch them with scripts/fetch_samples.sh
+samples/*.apk
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+# jadx and decompiled output
+tools/
+build/
+.apksmith-cache/
+

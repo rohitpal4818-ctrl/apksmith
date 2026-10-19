@@ -1,0 +1,1350 @@
+{
+  "identity": {
+    "package": "org.fdroid.fdroid",
+    "app_name": "F-Droid",
+    "version_name": "2.0.1",
+    "version_code": 2000051,
+    "min_sdk": 24,
+    "target_sdk": 37,
+    "main_activity": "org.fdroid.IconActivity",
+    "application_label": "@7F110045"
+  },
+  "permissions": [
+    {
+      "name": "android.permission.CAMERA",
+      "severity": "high",
+      "reason": "Can take photos and video.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.MANAGE_EXTERNAL_STORAGE",
+      "severity": "high",
+      "reason": "Full access to all shared storage, bypassing scoped storage.",
+      "referenced_in_code": false
+    },
+    {
+      "name": "android.permission.REQUEST_INSTALL_PACKAGES",
+      "severity": "high",
+      "reason": "Can silently ask to install other APKs.",
+      "referenced_in_code": false
+    },
+    {
+      "name": "android.permission.QUERY_ALL_PACKAGES",
+      "severity": "medium",
+      "reason": "Can enumerate every app installed on the device.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.READ_EXTERNAL_STORAGE",
+      "severity": "medium",
+      "reason": "Reads files on shared storage.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.WRITE_EXTERNAL_STORAGE",
+      "severity": "medium",
+      "reason": "Writes to shared storage.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.ACCESS_LOCAL_NETWORK",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.BLUETOOTH",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.BLUETOOTH_ADMIN",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.BLUETOOTH_ADVERTISE",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.BLUETOOTH_CONNECT",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.BLUETOOTH_SCAN",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.CHANGE_NETWORK_STATE",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.CHANGE_WIFI_STATE",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.ENFORCE_UPDATE_OWNERSHIP",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.FOREGROUND_SERVICE",
+      "severity": "low",
+      "reason": "Runs a persistent foreground service.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.INTERNET",
+      "severity": "low",
+      "reason": "Network access. Expected in most apps, worth noting for privacy review.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.POST_NOTIFICATIONS",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.RECEIVE_BOOT_COMPLETED",
+      "severity": "low",
+      "reason": "Starts automatically on device boot.",
+      "referenced_in_code": false
+    },
+    {
+      "name": "android.permission.REQUEST_DELETE_PACKAGES",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.WRITE_SETTINGS",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "org.fdroid.fdroid.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "org.fdroid.fdroid.permission.UPDATE_REPOS",
+      "severity": "low",
+      "reason": "Declared permission with no specific risk rule.",
+      "referenced_in_code": null
+    },
+    {
+      "name": "android.permission.ACCESS_NETWORK_STATE",
+      "severity": "info",
+      "reason": "Reads the current network type.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.ACCESS_WIFI_STATE",
+      "severity": "info",
+      "reason": "Reads WiFi state and scan results.",
+      "referenced_in_code": true
+    },
+    {
+      "name": "android.permission.WAKE_LOCK",
+      "severity": "info",
+      "reason": "Keeps the CPU awake.",
+      "referenced_in_code": true
+    }
+  ],
+  "components": [
+    {
+      "kind": "activity",
+      "name": "org.fdroid.fdroid.nearby.SwapWorkflowActivity",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.ui.panic.PanicActivity",
+      "exported": true,
+      "permission": null,
+      "intent_filters": [
+        "CONNECT",
+        "DEFAULT",
+        "DISCONNECT"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.ui.panic.PanicResponderActivity",
+      "exported": true,
+      "permission": null,
+      "intent_filters": [
+        "DEFAULT",
+        "TRIGGER"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.ui.panic.ExitActivity",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.ui.ipfs.IpfsGatewaySettingsActivity",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.MainActivity",
+      "exported": true,
+      "permission": null,
+      "intent_filters": [
+        "BROWSABLE",
+        "DEFAULT",
+        "LEANBACK_LAUNCHER",
+        "MAIN",
+        "SHOW_APP_INFO",
+        "VIEW"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.ui.crash.CrashActivity",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "com.journeyapps.barcodescanner.CaptureActivity",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.ui.repositories.UpdateRepoActivity",
+      "exported": true,
+      "permission": "org.fdroid.fdroid.permission.UPDATE_REPOS",
+      "intent_filters": [
+        "DEFAULT",
+        "UPDATE_REPOS"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.acra.dialog.CrashReportDialog",
+      "exported": null,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.IconCalculatorActivity",
+      "exported": true,
+      "permission": null,
+      "intent_filters": [
+        "APP_MARKET",
+        "LAUNCHER",
+        "MAIN"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.IconActivity",
+      "exported": true,
+      "permission": null,
+      "intent_filters": [
+        "APP_MARKET",
+        "LAUNCHER",
+        "MAIN"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "activity",
+      "name": "org.fdroid.fdroid.panic.CalculatorActivity",
+      "exported": true,
+      "permission": null,
+      "intent_filters": [
+        "APP_MARKET",
+        "LAUNCHER",
+        "MAIN"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "org.fdroid.fdroid.nearby.SwapService",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "org.fdroid.fdroid.nearby.LocalRepoService",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "org.fdroid.fdroid.nearby.TreeUriScannerIntentService",
+      "exported": false,
+      "permission": "android.permission.BIND_JOB_SERVICE",
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "org.fdroid.fdroid.nearby.SDCardScannerService",
+      "exported": false,
+      "permission": "android.permission.BIND_JOB_SERVICE",
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "org.fdroid.install.AppInstallService",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "androidx.work.impl.foreground.SystemForegroundService",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "androidx.work.impl.background.systemjob.SystemJobService",
+      "exported": true,
+      "permission": "android.permission.BIND_JOB_SERVICE",
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "androidx.room.MultiInstanceInvalidationService",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "org.acra.sender.LegacySenderService",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "service",
+      "name": "org.acra.sender.JobSenderService",
+      "exported": false,
+      "permission": "android.permission.BIND_JOB_SERVICE",
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "org.fdroid.fdroid.nearby.UsbDeviceAttachedReceiver",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [
+        "USB_DEVICE_ATTACHED"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "org.fdroid.fdroid.nearby.UsbDeviceDetachedReceiver",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [
+        "USB_DEVICE_DETACHED"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "org.fdroid.fdroid.nearby.UsbDeviceMediaMountedReceiver",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [
+        "MEDIA_BAD_REMOVAL",
+        "MEDIA_EJECT",
+        "MEDIA_MOUNTED",
+        "MEDIA_REMOVED"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "org.fdroid.install.UnarchivePackageReceiver",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [
+        "UNARCHIVE_PACKAGE"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "org.fdroid.updates.SelfUpdateReceiver",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [
+        "MY_PACKAGE_REPLACED"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "androidx.work.impl.background.systemalarm.RescheduleReceiver",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [
+        "BOOT_COMPLETED"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "androidx.work.impl.diagnostics.DiagnosticsReceiver",
+      "exported": true,
+      "permission": "android.permission.DUMP",
+      "intent_filters": [
+        "REQUEST_DIAGNOSTICS"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "receiver",
+      "name": "androidx.profileinstaller.ProfileInstallReceiver",
+      "exported": true,
+      "permission": "android.permission.DUMP",
+      "intent_filters": [
+        "BENCHMARK_OPERATION",
+        "INSTALL_PROFILE",
+        "SAVE_PROFILE",
+        "SKIP_FILE"
+      ],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "provider",
+      "name": "org.fdroid.install.ApkFileProvider",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "provider",
+      "name": "androidx.core.content.FileProvider",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "provider",
+      "name": "org.jetbrains.compose.resources.AndroidContextProvider",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    },
+    {
+      "kind": "provider",
+      "name": "org.acra.attachment.AcraContentProvider",
+      "exported": false,
+      "permission": null,
+      "intent_filters": [],
+      "deeplink_schemes": []
+    }
+  ],
+  "endpoints": [
+    {
+      "value": "https://4everland.io/ipfs/",
+      "scheme": "https",
+      "host": "4everland.io",
+      "path": "/ipfs/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://apt.izzysoft.de/fdroid/repo",
+      "scheme": "https",
+      "host": "apt.izzysoft.de",
+      "path": "/fdroid/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://archive.newpipe.net/fdroid/repo",
+      "scheme": "https",
+      "host": "archive.newpipe.net",
+      "path": "/fdroid/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://briarproject.org/fdroid/repo",
+      "scheme": "https",
+      "host": "briarproject.org",
+      "path": "/fdroid/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://f-droid.org",
+      "scheme": "https",
+      "host": "f-droid.org",
+      "path": null,
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://f-droid.org/F-Droid.apk",
+      "scheme": "https",
+      "host": "f-droid.org",
+      "path": "/F-Droid.apk",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://f-droid.org/donate",
+      "scheme": "https",
+      "host": "f-droid.org",
+      "path": "/donate",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://f-droid.org/donate/",
+      "scheme": "https",
+      "host": "f-droid.org",
+      "path": "/donate/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://f-droid.org/en/docs/Translation_and_Localization/",
+      "scheme": "https",
+      "host": "f-droid.org",
+      "path": "/en/docs/Translation_and_Localization/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://fdroid.link/#",
+      "scheme": "https",
+      "host": "fdroid.link",
+      "path": "/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://foobar.onion",
+      "scheme": "https",
+      "host": "foobar.onion",
+      "path": null,
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://forum.f-droid.org",
+      "scheme": "https",
+      "host": "forum.f-droid.org",
+      "path": null,
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://github.com/TeamNewPipe/NewPipe",
+      "scheme": "https",
+      "host": "github.com",
+      "path": "/TeamNewPipe/NewPipe",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://github.com/TeamNewPipe/NewPipe/issues",
+      "scheme": "https",
+      "host": "github.com",
+      "path": "/TeamNewPipe/NewPipe/issues",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://github.com/TeamNewPipe/NewPipe/releases",
+      "scheme": "https",
+      "host": "github.com",
+      "path": "/TeamNewPipe/NewPipe/releases",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://gitlab.com/fdroid/fdroidclient",
+      "scheme": "https",
+      "host": "gitlab.com",
+      "path": "/fdroid/fdroidclient",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://guardianproject.info/fdroid/repo",
+      "scheme": "https",
+      "host": "guardianproject.info",
+      "path": "/fdroid/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://hosted.weblate.org/projects/newpipe/",
+      "scheme": "https",
+      "host": "hosted.weblate.org",
+      "path": "/projects/newpipe/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://ipfs.io/ipfs/",
+      "scheme": "https",
+      "host": "ipfs.io",
+      "path": "/ipfs/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://liberapay.com",
+      "scheme": "https",
+      "host": "liberapay.com",
+      "path": null,
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://liberapay.com/",
+      "scheme": "https",
+      "host": "liberapay.com",
+      "path": "/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://liberapay.com/F-Droid-Data/donate",
+      "scheme": "https",
+      "host": "liberapay.com",
+      "path": "/F-Droid-Data/donate",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://liberapay.com/TeamNewPipe/donate",
+      "scheme": "https",
+      "host": "liberapay.com",
+      "path": "/TeamNewPipe/donate",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "http://logback.qos.ch/codes.html",
+      "scheme": "http",
+      "host": "logback.qos.ch",
+      "path": "/codes.html",
+      "source": "code",
+      "confidence": "medium"
+    },
+    {
+      "value": "http://logback.qos.ch/codes.html#1andOnly1",
+      "scheme": "http",
+      "host": "logback.qos.ch",
+      "path": "/codes.html",
+      "source": "code",
+      "confidence": "medium"
+    },
+    {
+      "value": "http://logback.qos.ch/codes.html#missingRightParenthesis",
+      "scheme": "http",
+      "host": "logback.qos.ch",
+      "path": "/codes.html",
+      "source": "code",
+      "confidence": "medium"
+    },
+    {
+      "value": "http://logback.qos.ch/manual/",
+      "scheme": "http",
+      "host": "logback.qos.ch",
+      "path": "/manual/",
+      "source": "code",
+      "confidence": "medium"
+    },
+    {
+      "value": "https://microg.org/fdroid/repo",
+      "scheme": "https",
+      "host": "microg.org",
+      "path": "/fdroid/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://mirror.example.com/fdroid/repo",
+      "scheme": "https",
+      "host": "mirror.example.com",
+      "path": "/fdroid/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://mirror.example.com/foo/bar/fdroid/repo",
+      "scheme": "https",
+      "host": "mirror.example.com",
+      "path": "/foo/bar/fdroid/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://mirror.example.net/repo",
+      "scheme": "https",
+      "host": "mirror.example.net",
+      "path": "/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://mirror.example.org",
+      "scheme": "https",
+      "host": "mirror.example.org",
+      "path": null,
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://mirror.example.org/with/a/very/long/url/that/wraps/repo",
+      "scheme": "https",
+      "host": "mirror.example.org",
+      "path": "/with/a/very/long/url/that/wraps/repo",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://my.imaginary.gateway/ifps/",
+      "scheme": "https",
+      "host": "my.imaginary.gateway",
+      "path": "/ifps/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://newpipe.net",
+      "scheme": "https",
+      "host": "newpipe.net",
+      "path": null,
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://newpipe.net/donate",
+      "scheme": "https",
+      "host": "newpipe.net",
+      "path": "/donate",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://opencollective.com",
+      "scheme": "https",
+      "host": "opencollective.com",
+      "path": null,
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://opencollective.com/",
+      "scheme": "https",
+      "host": "opencollective.com",
+      "path": "/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://opencollective.com/TeamNewPipe/donate",
+      "scheme": "https",
+      "host": "opencollective.com",
+      "path": "/TeamNewPipe/donate",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://opencollective.com/f-droid/donate",
+      "scheme": "https",
+      "host": "opencollective.com",
+      "path": "/f-droid/donate",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "https://spdx.org/licenses/",
+      "scheme": "https",
+      "host": "spdx.org",
+      "path": "/licenses/",
+      "source": "code",
+      "confidence": "high"
+    },
+    {
+      "value": "http://wifi-not-enabled",
+      "scheme": "http",
+      "host": "wifi-not-enabled",
+      "path": null,
+      "source": "code",
+      "confidence": "medium"
+    },
+    {
+      "value": "http://xml.org/sax/features/namespaces",
+      "scheme": "http",
+      "host": "xml.org",
+      "path": "/sax/features/namespaces",
+      "source": "code",
+      "confidence": "medium"
+    },
+    {
+      "value": "http://xml.org/sax/features/validation",
+      "scheme": "http",
+      "host": "xml.org",
+      "path": "/sax/features/validation",
+      "source": "code",
+      "confidence": "medium"
+    }
+  ],
+  "deeplinks": [
+    {
+      "value": "content://",
+      "scheme": "content",
+      "host": null,
+      "path": null,
+      "source": "manifest",
+      "confidence": "high"
+    },
+    {
+      "value": "file://",
+      "scheme": "file",
+      "host": null,
+      "path": null,
+      "source": "manifest",
+      "confidence": "high"
+    },
+    {
+      "value": "market://details",
+      "scheme": "market",
+      "host": "details",
+      "path": null,
+      "source": "manifest",
+      "confidence": "high"
+    },
+    {
+      "value": "https://",
+      "scheme": "https",
+      "host": null,
+      "path": null,
+      "source": "manifest",
+      "confidence": "high"
+    },
+    {
+      "value": "fdroidrepos://",
+      "scheme": "fdroidrepos",
+      "host": null,
+      "path": null,
+      "source": "manifest",
+      "confidence": "high"
+    },
+    {
+      "value": "FDROIDREPOS://",
+      "scheme": "FDROIDREPOS",
+      "host": null,
+      "path": null,
+      "source": "manifest",
+      "confidence": "high"
+    }
+  ],
+  "webview_bridges": [],
+  "crypto": [
+    {
+      "primitive": "RC4",
+      "detail": "RC4 is cryptographically broken.",
+      "severity": "high"
+    },
+    {
+      "primitive": "MD5",
+      "detail": "MD5 is broken for collision resistance.",
+      "severity": "medium"
+    },
+    {
+      "primitive": "SHA1",
+      "detail": "SHA-1 is deprecated for signatures.",
+      "severity": "low"
+    },
+    {
+      "primitive": "ECB",
+      "detail": "ECB mode does not hide patterns in plaintext.",
+      "severity": "high"
+    }
+  ],
+  "sdks": [
+    {
+      "name": "WorkManager",
+      "category": "background",
+      "evidence": [
+        "442 classes matching Landroidx/work/"
+      ]
+    },
+    {
+      "name": "ACRA",
+      "category": "crash-reporting",
+      "evidence": [
+        "217 classes matching Lorg/acra/"
+      ]
+    },
+    {
+      "name": "Room",
+      "category": "database",
+      "evidence": [
+        "271 classes matching Landroidx/room/"
+      ]
+    },
+    {
+      "name": "OkHttp",
+      "category": "networking",
+      "evidence": [
+        "293 classes matching Lokhttp3/"
+      ]
+    },
+    {
+      "name": "Glide",
+      "category": "ui",
+      "evidence": [
+        "15 classes matching Lcom/bumptech/glide/"
+      ]
+    }
+  ],
+  "native_libs": [
+    {
+      "name": "libandroidx.graphics.path.so",
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64"
+      ],
+      "size_bytes": 37392,
+      "is_stripped": null
+    }
+  ],
+  "findings": [
+    {
+      "category": "crypto",
+      "title": "Weak or misused crypto: RC4",
+      "detail": "RC4 is cryptographically broken. Note this may come from a bundled dependency rather than the app's own code -- string-pool presence does not identify the owning class.",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        "RC4"
+      ],
+      "location": null,
+      "metadata": {}
+    },
+    {
+      "category": "crypto",
+      "title": "Weak or misused crypto: ECB",
+      "detail": "ECB mode does not hide patterns in plaintext. Note this may come from a bundled dependency rather than the app's own code -- string-pool presence does not identify the owning class.",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        "ECB"
+      ],
+      "location": null,
+      "metadata": {}
+    },
+    {
+      "category": "crypto",
+      "title": "Possible hardcoded encryption key",
+      "detail": "A hex string of key length appears in the string pool alongside crypto APIs. Confirm before treating as real.",
+      "severity": "high",
+      "confidence": "low",
+      "evidence": [
+        "000E0D4D696E6768756151750CC03A4473D03679",
+        "0017858FEB7A98975169E171F77B4087DE098AC8A911DF7B01",
+        "002757A1114D696E6768756151755316C05E0BD4"
+      ],
+      "location": null,
+      "metadata": {}
+    },
+    {
+      "category": "permission",
+      "title": "CAMERA declared",
+      "detail": "Can take photos and video.",
+      "severity": "high",
+      "confidence": "high",
+      "evidence": [
+        "CameraManager"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "permission": "android.permission.CAMERA",
+        "referenced_in_code": true
+      }
+    },
+    {
+      "category": "permission",
+      "title": "MANAGE_EXTERNAL_STORAGE declared",
+      "detail": "Full access to all shared storage, bypassing scoped storage.",
+      "severity": "high",
+      "confidence": "high",
+      "evidence": [],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "permission": "android.permission.MANAGE_EXTERNAL_STORAGE",
+        "referenced_in_code": false
+      }
+    },
+    {
+      "category": "permission",
+      "title": "REQUEST_INSTALL_PACKAGES declared",
+      "detail": "Can silently ask to install other APKs.",
+      "severity": "high",
+      "confidence": "high",
+      "evidence": [],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "permission": "android.permission.REQUEST_INSTALL_PACKAGES",
+        "referenced_in_code": false
+      }
+    },
+    {
+      "category": "component",
+      "title": "Exported activity: org.fdroid.ui.panic.PanicActivity",
+      "detail": "Exported component with no permission guard.",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        "CONNECT",
+        "DEFAULT",
+        "DISCONNECT"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "component": "org.fdroid.ui.panic.PanicActivity",
+        "kind": "activity",
+        "is_launcher": false,
+        "intent_filters": [
+          "CONNECT",
+          "DEFAULT",
+          "DISCONNECT"
+        ]
+      }
+    },
+    {
+      "category": "component",
+      "title": "Exported activity: org.fdroid.ui.panic.PanicResponderActivity",
+      "detail": "Exported component with no permission guard.",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        "DEFAULT",
+        "TRIGGER"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "component": "org.fdroid.ui.panic.PanicResponderActivity",
+        "kind": "activity",
+        "is_launcher": false,
+        "intent_filters": [
+          "DEFAULT",
+          "TRIGGER"
+        ]
+      }
+    },
+    {
+      "category": "component",
+      "title": "Exported activity: org.fdroid.MainActivity",
+      "detail": "Exported component with no permission guard.",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        "BROWSABLE",
+        "DEFAULT",
+        "LEANBACK_LAUNCHER",
+        "MAIN",
+        "SHOW_APP_INFO"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "component": "org.fdroid.MainActivity",
+        "kind": "activity",
+        "is_launcher": false,
+        "intent_filters": [
+          "BROWSABLE",
+          "DEFAULT",
+          "LEANBACK_LAUNCHER",
+          "MAIN",
+          "SHOW_APP_INFO",
+          "VIEW"
+        ]
+      }
+    },
+    {
+      "category": "crypto",
+      "title": "Weak or misused crypto: MD5",
+      "detail": "MD5 is broken for collision resistance. Note this may come from a bundled dependency rather than the app's own code -- string-pool presence does not identify the owning class.",
+      "severity": "medium",
+      "confidence": "low",
+      "evidence": [
+        "MD5"
+      ],
+      "location": null,
+      "metadata": {}
+    },
+    {
+      "category": "endpoint",
+      "title": "7 endpoint(s) use plain HTTP",
+      "detail": "Traffic over http:// is readable by anyone on the network path.",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        "http://logback.qos.ch/codes.html",
+        "http://logback.qos.ch/codes.html#1andOnly1",
+        "http://logback.qos.ch/codes.html#missingRightParenthesis",
+        "http://logback.qos.ch/manual/",
+        "http://wifi-not-enabled",
+        "http://xml.org/sax/features/namespaces",
+        "http://xml.org/sax/features/validation"
+      ],
+      "location": null,
+      "metadata": {
+        "count": 7
+      }
+    },
+    {
+      "category": "permission",
+      "title": "QUERY_ALL_PACKAGES declared",
+      "detail": "Can enumerate every app installed on the device.",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        "getInstalledPackages"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "permission": "android.permission.QUERY_ALL_PACKAGES",
+        "referenced_in_code": true
+      }
+    },
+    {
+      "category": "permission",
+      "title": "READ_EXTERNAL_STORAGE declared",
+      "detail": "Reads files on shared storage.",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        "getExternalStorageDirectory"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "permission": "android.permission.READ_EXTERNAL_STORAGE",
+        "referenced_in_code": true
+      }
+    },
+    {
+      "category": "permission",
+      "title": "WRITE_EXTERNAL_STORAGE declared",
+      "detail": "Writes to shared storage.",
+      "severity": "medium",
+      "confidence": "high",
+      "evidence": [
+        "getExternalStorageDirectory"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "permission": "android.permission.WRITE_EXTERNAL_STORAGE",
+        "referenced_in_code": true
+      }
+    },
+    {
+      "category": "component",
+      "title": "Exported activity: org.fdroid.IconCalculatorActivity",
+      "detail": "Launcher activity. Exported without a permission, which is expected and required for the home screen to start the app.",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        "APP_MARKET",
+        "LAUNCHER",
+        "MAIN"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "component": "org.fdroid.IconCalculatorActivity",
+        "kind": "activity",
+        "is_launcher": true,
+        "intent_filters": [
+          "APP_MARKET",
+          "LAUNCHER",
+          "MAIN"
+        ]
+      }
+    },
+    {
+      "category": "component",
+      "title": "Exported activity: org.fdroid.IconActivity",
+      "detail": "Launcher activity. Exported without a permission, which is expected and required for the home screen to start the app.",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        "APP_MARKET",
+        "LAUNCHER",
+        "MAIN"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "component": "org.fdroid.IconActivity",
+        "kind": "activity",
+        "is_launcher": true,
+        "intent_filters": [
+          "APP_MARKET",
+          "LAUNCHER",
+          "MAIN"
+        ]
+      }
+    },
+    {
+      "category": "component",
+      "title": "Exported activity: org.fdroid.fdroid.panic.CalculatorActivity",
+      "detail": "Launcher activity. Exported without a permission, which is expected and required for the home screen to start the app.",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        "APP_MARKET",
+        "LAUNCHER",
+        "MAIN"
+      ],
+      "location": "AndroidManifest.xml",
+      "metadata": {
+        "component": "org.fdroid.fdroid.panic.CalculatorActivity",
+        "kind": "activity",
+        "is_launcher": true,
+        "intent_filters": [
+          "APP_MARKET",
+          "LAUNCHER",
+          "MAIN"
+        ]
+      }
+    },
+    {
+      "category": "native",
+      "title": "1 native library bundled",
+      "detail": "Native code cannot be decompiled back to source. Later stages will treat these libraries as a black box.",
+      "severity": "info",
+      "confidence": "high",
+      "evidence": [
+        "libandroidx.graphics.path.so"
+      ],
+      "location": null,
+      "metadata": {
+        "total_size_bytes": 37392,
+        "abis": [
+          "arm64-v8a",
+          "armeabi-v7a",
+          "x86",
+          "x86_64"
+        ]
+      }
+    }
+  ],
+  "metrics": {
+    "dex_count": 3,
+    "total_classes": 24520,
+    "own_classes": 161,
+    "third_party_classes": 24359,
+    "third_party_ratio": 0.9934,
+    "total_methods": 119203,
+    "total_strings": 128732,
+    "printable_strings": 127531,
+    "component_count": 36,
+    "exported_components": 10,
+    "endpoint_count": 44,
+    "native_lib_count": 1,
+    "short_name_ratio": 0.0035,
+    "avg_class_name_length": 17.18
+  },
+  "apk_sha256": "83d3fe522281c3cb89fce3bc05038f81b3c3b32c108536941f184c5f9bb53778",
+  "apk_size_bytes": 12537183,
+  "risk_score": 78
+}

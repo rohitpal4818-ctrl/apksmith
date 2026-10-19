@@ -1,0 +1,18 @@
+# Normalise line endings in the repository; let binaries stay binary.
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Sample outputs are data, not text to be diffed usefully.
+reports/*.json -diff
+reports/*.json linguist-generated=true
+
+# Generated Dart is excluded from language stats; it would skew the ratio.
+build/** linguist-generated=true -diff
+tools/** linguist-vendored=true
+
+*.png binary
+*.jpg binary
+*.apk binary
+*.jar binary

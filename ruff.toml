@@ -1,0 +1,41 @@
+# Ruff configuration
+
+target-version = "py311"
+line-length = 90
+
+[lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "C4",  # comprehensions
+    "SIM", # simplify
+]
+ignore = [
+    # Typer's whole API is function calls in default arguments
+    # (typer.Option(...), typer.Argument(...)). Flagging these would require
+    # per-line noqa on every command.
+    "B008",
+    # `class Severity(str, Enum)` rather than `StrEnum`: Pydantic 2 serialises
+    # the str+Enum form reliably, and the explicit base keeps behaviour obvious.
+    "UP042",
+    # raise ... from None is deliberate where we replace a parser error.
+    "B904",
+    # Bare except around third-party parsers is deliberate and commented.
+    "E501",
+    # An explicit if/else is clearer than a ternary when the branches carry
+    # different comments explaining intent.
+    "SIM108",
+]
+
+[lint.per-file-ignores]
+# Tests may use fixtures and long assertion messages.
+"tests/*" = ["E402", "F401"]
+# The MCP server has a stdio entry point that is not imported elsewhere.
+"src/apksmith/mcp_server.py" = ["F401"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
