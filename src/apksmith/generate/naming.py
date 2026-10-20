@@ -30,6 +30,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from ..fileio import write_text
+
 
 class SpecError(Exception):
     """The spec cannot be turned into a project."""
@@ -37,6 +39,13 @@ class SpecError(Exception):
 
 @dataclass
 class GeneratedFile:
+    """One file of a generated project, held in memory until ``write``.
+
+    ``origin`` is what the generated project's README uses to separate what is
+    real from what is a placeholder, so it is part of the contract rather than
+    a debugging nicety.
+    """
+
     path: str
     content: str
     #: ``scaffold`` = correct by construction, ``model`` = LLM assisted,
@@ -47,28 +56,41 @@ class GeneratedFile:
 
 @dataclass
 class GenerationResult:
+    """Everything produced from one spec, plus the honest gaps.
+
+    Warnings are things that look wrong in the input; open questions are things
+    the spec did not say and a human has to decide. Both are surfaced by the
+    CLI, because silently inventing either would be worse than saying nothing.
+    """
+
     files: list[GeneratedFile] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     #: Things the spec did not tell us, which a human must supply.
     open_questions: list[str] = field(default_factory=list)
 
     def write(self, root: Path, overwrite: bool = False) -> list[Path]:
-        """Write every file under ``root``. Returns the paths written."""
+        """Write every file under ``root``. Returns the paths written.
+
+        Existing files are skipped unless ``overwrite`` is set, so re-running
+        against a directory with hand edits in it does not discard them.
+        """
         written: list[Path] = []
-        for gf in self.files:
-            dest = root / gf.path
+        for generated_file in self.files:
+            dest = root / generated_file.path
             if dest.exists() and not overwrite:
                 continue
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(gf.content, encoding="utf-8", newline="\n")
+            write_text(dest, generated_file.content)
             written.append(dest)
         return written
 
     def summary(self) -> str:
+        """One line, e.g. ``41 scaffold, 3 stub``, for the CLI to echo."""
         by_origin: dict[str, int] = {}
-        for gf in self.files:
-            by_origin[gf.origin] = by_origin.get(gf.origin, 0) + 1
-        return ", ".join(f"{v} {k}" for k, v in sorted(by_origin.items()))
+        for generated_file in self.files:
+            by_origin[generated_file.origin] = by_origin.get(generated_file.origin, 0) + 1
+        return ", ".join(
+            f"{count} {origin}" for origin, count in sorted(by_origin.items())
+        )
 
 
 # --------------------------------------------------------------------------- #

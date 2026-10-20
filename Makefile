@@ -34,9 +34,11 @@ $(SAMPLE):
 test:  ## Run the test suite
 	$(BIN) -m pytest
 
-lint:  ## Check formatting and lint rules
+lint:  ## Check formatting, lint rules, docs and docstrings
 	$(BIN) -m ruff check src tests scripts
 	$(BIN) -m ruff format --check src tests scripts
+	$(BIN) scripts/check_docs.py
+	$(BIN) scripts/check_docstrings.py
 
 format:  ## Apply formatting and safe fixes
 	$(BIN) -m ruff check src tests scripts --fix

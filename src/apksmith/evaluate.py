@@ -111,12 +111,19 @@ def _norm_label(text: str) -> str:
 # --------------------------------------------------------------------------- #
 @dataclass
 class MetricResult:
+    """One named score, with the detail needed to argue with it.
+
+    ``detail`` carries the human-readable reason — which labels matched, which
+    were missed — because a bare F1 is not actionable.
+    """
+
     name: str
     value: float
     detail: str = ""
 
     @property
     def percent(self) -> float:
+        """The same value on a 0-100 scale, rounded for display."""
         return round(self.value * 100, 1)
 
 
@@ -171,10 +178,12 @@ class CaseResult:
 
     @property
     def mean_f1(self) -> float:
+        """Average of every ``*_f1`` metric, which is the headline number."""
         f1s = [m.value for m in self.metrics if m.name.endswith("_f1")]
         return sum(f1s) / len(f1s) if f1s else 0.0
 
     def to_dict(self) -> dict:
+        """Serialise for JSON output. Values are rounded, not reformatted."""
         return {
             "app": self.app,
             "mean_f1": round(self.mean_f1, 4),
@@ -310,13 +319,21 @@ def evaluate(
 
 @dataclass
 class SuiteReport:
+    """Every case in a suite, plus the aggregates the report quotes.
+
+    An empty suite is legal and scores zero rather than raising, because a
+    reference file that fails to list cases is a content bug, not a crash.
+    """
+
     cases: list[CaseResult] = field(default_factory=list)
 
     @property
     def mean_f1(self) -> float:
+        """Mean of the per-case headline F1. One app, one vote."""
         return sum(c.mean_f1 for c in self.cases) / len(self.cases) if self.cases else 0.0
 
     def per_metric(self) -> dict[str, float]:
+        """Average each metric across cases, sorted by name for stable reports."""
         totals: dict[str, list[float]] = {}
         for case in self.cases:
             for m in case.metrics:
@@ -324,6 +341,7 @@ class SuiteReport:
         return {k: sum(v) / len(v) for k, v in sorted(totals.items())}
 
     def to_markdown(self) -> str:
+        """Render the report committed at ``reports/sample-evaluation.md``."""
         lines = [
             "# APKSmith evaluation report",
             "",
@@ -425,8 +443,3 @@ def load_suite(path: Path) -> SuiteReport:
             if case.get("spec")
         ]
     )
-
-
-def save_suite(path: Path, suite: SuiteReport) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(suite.to_markdown(), encoding="utf-8", newline="\n")

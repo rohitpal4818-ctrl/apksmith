@@ -28,6 +28,17 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **CLI modules are named for what they do.** `m2.py` and `m3_m5.py` became
+  `commands/understand.py`, `commands/generate.py` and
+  `commands/evaluate.py`. A file called `m3_m5.py` describes a schedule, not a
+  responsibility, and it held two unrelated command groups.
+- **All file output goes through `fileio.write_text`**, replacing four copies
+  of the same mkdir/encoding/newline logic.
+- **Every public class and method has a docstring.** `evaluate.save_suite` was
+  deleted instead: nothing called it, and it wrote Markdown despite its name.
+- **`docs/README.md`** indexes the documentation, and **`docs/TESTING.md`**
+  explains what each test file pins and what the suite deliberately does not
+  cover. The README's tree now maps the whole repository rather than `src/`.
 - `LlmClient` docs and error messages are provider-aware. A missing key names
   the right environment variable and the right signup URL instead of always
   saying `OPENROUTER_API_KEY`.
@@ -36,6 +47,10 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`generate` marked every nested file as skipped.** The "was this written"
+  check compared a generated relative path (`lib/screens/home.dart`) against a
+  set of basenames (`home.dart`), so the match never succeeded below the top
+  level. It now compares resolved paths.
 - **`own_classes` was counted from the manifest package**, which is the one
   thing `docs/ARCHITECTURE.md` warns not to do. F-Droid declares
   `org.fdroid.fdroid` but ships under `org.fdroid`, so the report claimed 161

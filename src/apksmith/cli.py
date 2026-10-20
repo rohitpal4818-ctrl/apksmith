@@ -18,9 +18,13 @@ from pathlib import Path
 
 import typer
 
-from . import __version__, m2, m3_m5
+from . import __version__
 from .app import analyse, coverage_notes
+from .commands import evaluate as evaluate_cmd
+from .commands import generate as generate_cmd
+from .commands import understand as understand_cmd
 from .errors import ApkSmithError
+from .fileio import write_text
 from .logging_setup import configure_logging
 from .report import to_json, to_markdown, to_terminal
 
@@ -30,9 +34,9 @@ cli = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
 )
-cli.add_typer(m2.cli, name="understand", help="M2: infer what an app does")
-cli.add_typer(m3_m5.generate_cli, name="generate", help="M3: spec -> project")
-cli.add_typer(m3_m5.evaluate_cli, name="evaluate", help="M5: score against references")
+cli.add_typer(understand_cmd.app, name="understand", help="M2: infer what an app does")
+cli.add_typer(generate_cmd.app, name="generate", help="M3: spec -> project")
+cli.add_typer(evaluate_cmd.app, name="evaluate", help="M5: score against references")
 
 
 def _run(path: Path, verbose: bool) -> object:
@@ -42,12 +46,6 @@ def _run(path: Path, verbose: bool) -> object:
         typer.echo(f"apksmith {__version__}")
         typer.echo(f"analysing {path}")
     return analyse(path, progress=verbose)
-
-
-def _write(path: Path, content: str) -> None:
-    """Write a report, creating parent directories as needed."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8", newline="\n")
 
 
 @cli.command()
@@ -70,11 +68,11 @@ def scan(
     typer.echo(to_terminal(report, top_n=top))
 
     if json_out:
-        _write(json_out, to_json(report))
+        write_text(json_out, to_json(report))
         typer.secho(f"\nwrote JSON     -> {json_out}", fg=typer.colors.GREEN)
 
     if md_out:
-        _write(md_out, to_markdown(report))
+        write_text(md_out, to_markdown(report))
         typer.secho(f"wrote Markdown -> {md_out}", fg=typer.colors.GREEN)
 
     # Non-zero exit when something notable was found makes the tool usable in

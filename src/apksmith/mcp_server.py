@@ -86,6 +86,7 @@ class Workspace:
         self._root = Path(tempfile.mkdtemp(prefix="apksmith-mcp-"))
 
     def source_dir(self, digest: str) -> Path | None:
+        """Where this APK was decompiled, or ``None`` if it never was."""
         return self._dirs.get(digest)
 
     def allocate(self, digest: str) -> Path:
@@ -98,9 +99,15 @@ class Workspace:
         return self._root / digest
 
     def remember(self, digest: str, path: Path) -> None:
+        """Record that this APK's sources now live at ``path``.
+
+        Called after a successful decompile, so the next tool call on the same
+        APK reuses the tree instead of spending another few minutes in jadx.
+        """
         self._dirs[digest] = path
 
     def cleanup(self) -> None:
+        """Remove this session's temp root. Safe to call twice."""
         shutil.rmtree(self._root, ignore_errors=True)
 
 

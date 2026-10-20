@@ -35,6 +35,11 @@ class Severity(str, Enum):
 
     @property
     def weight(self) -> int:
+        """Contribution to the raw risk total, before saturation.
+
+        INFO is zero on purpose: recording something without adding it to the
+        score is how the report stays readable for a benign app.
+        """
         return {
             Severity.INFO: 0,
             Severity.LOW: 5,

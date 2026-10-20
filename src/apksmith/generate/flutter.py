@@ -47,6 +47,11 @@ class _NameRegistry:
         self._used: set[str] = set(reserved or set())
 
     def unique(self, base: str) -> str:
+        """Return ``base``, or ``base_2``, ``base_3``... if it is already taken.
+
+        Also records the result, so a later caller asking for the same name gets
+        the next suffix rather than the same one.
+        """
         candidate = base
         suffix = 2
         while candidate in self._used:

@@ -1,11 +1,12 @@
-"""
-M2: the understanding stage.
+"""``apksmith understand``: the M2 stage, decompiled source to behaviour spec.
 
-Turns decompiled sources plus the M1 report into a behaviour specification.
+    apksmith understand run app.apk                  full run
+    apksmith understand run app.apk --dry-run        build prompts, call nothing
+    apksmith understand run app.apk --max-classes 40 smaller class budget
 
-    apksmith understand app.apk                    full run
-    apksmith understand app.apk --dry-run          build prompts, call nothing
-    apksmith understand app.apk --max-classes 40   smaller class budget
+This is the only command that spends money or needs an API key. Everything it
+delegates to is deterministic up to the point where a class summary is sent to
+a model, so ``--dry-run`` shows exactly what would be sent, for free.
 """
 
 from __future__ import annotations
@@ -15,24 +16,25 @@ from pathlib import Path
 
 import typer
 
-from .errors import ApkSmithError
-from .ingest import jadx
-from .logging_setup import configure_logging
-from .models import RiskReport
-from .understand.extract import extract_tree
-from .understand.llm import DEFAULT_MODEL, LlmClient, known_providers
-from .understand.pipeline import understand
-from .understand.prompt import SYSTEM, extraction_prompt
-from .understand.rank import role_census, select
+from ..errors import ApkSmithError
+from ..fileio import write_text
+from ..ingest import jadx
+from ..logging_setup import configure_logging
+from ..models import RiskReport
+from ..understand.extract import extract_tree
+from ..understand.llm import DEFAULT_MODEL, LlmClient, known_providers
+from ..understand.pipeline import understand
+from ..understand.prompt import SYSTEM, extraction_prompt
+from ..understand.rank import role_census, select
 
-cli = typer.Typer(
+app = typer.Typer(
     name="understand",
     help="M2: decompiled source + static report -> behaviour specification.",
     no_args_is_help=True,
 )
 
 
-@cli.command()
+@app.command()
 def run(
     apk: Path = typer.Argument(..., exists=True, help="Path to the .apk"),
     report_json: Path | None = typer.Option(
@@ -91,7 +93,7 @@ def run(
         )
         raise typer.Exit(code=1)
 
-    from .app import analyse
+    from ..app import analyse
 
     # ---- M1: static report ------------------------------------------------ #
     if report_json and report_json.is_file():
@@ -131,7 +133,7 @@ def run(
         typer.echo(f"decompiled to {source_root}")
 
     try:
-        from .understand.pipeline import resolve_app_prefixes
+        from ..understand.pipeline import resolve_app_prefixes
 
         prefixes = resolve_app_prefixes(report, source_root)
         if prefixes:
@@ -192,10 +194,10 @@ def run(
             verbose=verbose,
         )
 
-        _write(out, result.spec.to_markdown())
+        write_text(out, result.spec.to_markdown())
         typer.secho(f"wrote behaviour spec -> {out}", fg=typer.colors.GREEN)
         if json_out:
-            _write(json_out, result.spec.model_dump_json(indent=2))
+            write_text(json_out, result.spec.model_dump_json(indent=2))
             typer.secho(f"wrote spec JSON      -> {json_out}", fg=typer.colors.GREEN)
 
         typer.echo("\nrun stats")
@@ -218,8 +220,3 @@ def run(
             # This ran on a real APK before it was caught.
             shutil.rmtree(tmp_dir, ignore_errors=True)
             typer.echo(f"cleaned up {tmp_dir}")
-
-
-def _write(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8", newline="\n")

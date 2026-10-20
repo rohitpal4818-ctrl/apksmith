@@ -50,6 +50,40 @@ accepted deliberately. A shared neutral `specs/` package would be tidier, and
 it would also blur the boundary the tests rely on: that M3 can be exercised
 without importing anything from `understand/pipeline.py`.
 
+## Where things live
+
+Two kinds of module, and the distinction is enforced by review rather than by
+imports:
+
+- **Library packages** (`ingest/`, `analyze/`, `understand/`, `generate/`,
+  `report/`) hold logic. They do not import Typer, they do not print, and they
+  do not read environment variables. `understand/llm.py` takes an API key as an
+  argument rather than reaching for `os.environ`, which is what lets the
+  end-to-end tests run it against a stub.
+- **Command modules** (`commands/`) hold Typer apps. They validate input, call
+  one library function, and format the result. `commands/understand.py` is the
+  only place in the codebase that reads `OPENROUTER_API_KEY`, and it reads it
+  once, to construct the client.
+
+The root commands (`scan`, `coverage`, `version`) are small enough to live in
+`cli.py` directly. Everything with more than one option group gets its own
+module under `commands/`.
+
+Directory names describe responsibility, not milestone. The milestones are a
+sequence of work, not a decomposition of the problem, and a file called
+`m3_m5.py` tells a reader nothing about what it contains. Milestone numbers
+remain in the docs, the changelog and the `--help` text, where they order the
+work without deciding where code goes.
+
+## Output goes through one door
+
+Every artefact is text, and all of it is written by `fileio.write_text`. That
+single function exists because the same three bugs got fixed four times
+otherwise: a missing parent directory, an encoding that depended on the
+platform's codepage, and line endings that made a Windows run produce different
+bytes from a Linux run. Centralising it means the determinism claim in the
+README has one implementation to point at.
+
 ## Why some things are hard
 
 ### The DEX string pool is 99% noise

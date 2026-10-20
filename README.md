@@ -147,33 +147,49 @@ an API key.
 
 ```
 apksmith/
-  ingest/       APK -> parsed objects
-    apkfile.py    validation, SHA-256, DEX strings/classes/methods, native libs
-    manifest.py   AndroidManifest.xml -> identity, components, deep links
-    jadx.py       optional decompilation to readable Java
-  analyze/      parsed -> typed findings
-    permissions.py  risk-weighted table; declared vs actually-used
-    code.py        endpoints, WebView bridges, crypto primitives
-    sdks.py        third-party SDK fingerprinting
-    structure.py   exported surface, native libs, obfuscation metrics
-  understand/   M2: source -> behaviour spec
-    extract.py     decompiled Java -> compact class summaries
-    rank.py        role classification, class selection
-    llm.py         provider routing (OpenRouter/Groq), disk cache, rate limits
-    prompt.py      prompt construction and the JSON contract
-    spec.py        BehaviourSpec output model
-    pipeline.py    resolve package, chunk, extract, merge, synthesise
-  generate/     M3: spec -> project
-    naming.py      identifier derivation
-    templates.py   Dart/Flutter templates
-    flutter.py     project builder
-  evaluate.py   M5: scoring against references
-  mcp_server.py M4: MCP tools
-  report/       terminal | markdown | JSON
-  app.py        pipeline orchestration
-  models.py     every finding, as validated Pydantic models
-  cli.py        command-line interface
+  src/apksmith/
+    ingest/       APK -> parsed objects
+      apkfile.py    validation, SHA-256, DEX strings/classes/methods, native libs
+      manifest.py   AndroidManifest.xml -> identity, components, deep links
+      jadx.py       optional decompilation to readable Java
+    analyze/      parsed -> typed findings
+      permissions.py  risk-weighted table; declared vs actually-used
+      code.py        endpoints, WebView bridges, crypto primitives
+      sdks.py        third-party SDK fingerprinting
+      structure.py   exported surface, native libs, own-code and obfuscation metrics
+    understand/   M2: source -> behaviour spec
+      extract.py     decompiled Java -> compact class summaries
+      rank.py        role classification, class selection
+      llm.py         provider routing (OpenRouter/Groq), disk cache, rate limits
+      prompt.py      prompt construction and the JSON contract
+      spec.py        BehaviourSpec output model
+      pipeline.py    resolve package, chunk, extract, merge, synthesise
+    generate/     M3: spec -> project
+      naming.py      identifier derivation
+      templates.py   Dart/Flutter templates
+      flutter.py     project builder
+    commands/     one module per CLI verb group
+      understand.py  M2 command: validate, decompile, call the model
+      generate.py    M3 command: spec -> project
+      evaluate.py    M5 command: score against references
+    report/       terminal | markdown | JSON renderers
+    models.py     every finding, as validated Pydantic models
+    app.py        M1 pipeline orchestration
+    evaluate.py   M5 scoring logic (no CLI)
+    mcp_server.py M4: the same operations as seven agent tools
+    fileio.py     the one place output files are written
+    cli.py        root command app: scan, coverage, version
+
+  tests/          one file per concern; see docs/TESTING.md
+  evaluation/     hand-written references and an example spec
+  reports/        committed sample output, with provenance in README.md
+  scripts/        sample fetch, doc-claim checker, publication helper
+  docs/           architecture and testing notes
 ```
+
+Directories are named for what they do, not for the milestone they belong to.
+Milestone numbers live in the docs, the changelog and the CLI help text, where
+they order the work without deciding where a file goes.
 
 ### Decisions worth knowing about
 
@@ -264,8 +280,11 @@ apksmith generate run evaluation/example_spec.json --out build/recon
 
 ## Further reading
 
+- [`docs/`](docs/README.md) — index of every document
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how it fits together and
   why the hard parts are hard
+- [`docs/TESTING.md`](docs/TESTING.md) — what each test file pins, and what it
+  deliberately does not
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, and what this project believes
 - [`CHANGELOG.md`](CHANGELOG.md) — what changed and what is still broken
 

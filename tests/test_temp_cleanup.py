@@ -20,7 +20,7 @@ import pytest
 
 def test_cleanup_removes_our_directory_only():
     """The pattern that caused the bug must not come back."""
-    from apksmith.m2 import _write  # noqa: F401  (import smoke check)
+    from apksmith.fileio import write_text  # noqa: F401  (import smoke check)
 
     system_temp = Path(tempfile.gettempdir())
     ours = Path(tempfile.mkdtemp(prefix="apksmith-selftest-"))
@@ -29,7 +29,7 @@ def test_cleanup_removes_our_directory_only():
 
     assert ours.parent == system_temp, "precondition: we are a direct child of temp"
 
-    # This is what m2.py's finally block now does.
+    # This is what the understand command's finally block now does.
     import shutil
 
     shutil.rmtree(ours, ignore_errors=True)

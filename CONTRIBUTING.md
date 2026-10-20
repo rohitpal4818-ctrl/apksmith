@@ -32,9 +32,13 @@ M2 needs jadx on `PATH`. Download from
 
 ```bash
 pytest                          # 188 tests, no key or network needed
-ruff check src tests            # lint
-ruff format src tests           # format
+ruff check src tests scripts    # lint
+ruff format src tests scripts   # format
+python scripts/check_docs.py    # prose matches the artifacts
+python scripts/check_docstrings.py
 ```
+
+`make check` runs all four. It is the same set CI runs, which is the point.
 
 To try the pipeline on a real APK:
 
@@ -74,6 +78,26 @@ to another model's output measures nothing. References come from public
 documentation, and `evaluation/suite.json` says so in a `_comment` field that a
 test asserts on.
 
+## Where code goes
+
+The layout is a boundary, not a filing convention.
+
+- **`ingest/`, `analyze/`, `understand/`, `generate/`, `report/`** hold logic.
+  They do not import Typer, do not print, and do not read environment
+  variables. Anything that needs to know about the outside world takes it as an
+  argument — which is why `LlmClient` accepts an API key instead of reading
+  `OPENROUTER_API_KEY` itself, and why the whole of M2 is testable without a
+  network.
+- **`commands/`** holds one Typer app per verb group. A command validates its
+  input, calls one library function, and formats the result. If you find
+  yourself writing analysis inside a command, the logic belongs a level down.
+- **`fileio.write_text`** is the only place files are written. Encoding and
+  line endings are guaranteed there, not in each caller.
+
+When adding a file, name it after what it does. Milestone numbers belong in the
+docs and the changelog, where they order work; they make poor filenames because
+they describe a schedule rather than a responsibility.
+
 ## Adding an analyser
 
 1. Add the finding type to `models.py` if it is new.
@@ -87,9 +111,13 @@ test asserts on.
 ## Pull requests
 
 - One concern per PR. Split refactors from behaviour changes.
-- New behaviour comes with a test that fails without it.
+- New behaviour comes with a test that fails without it. See
+  [`docs/TESTING.md`](docs/TESTING.md) for which layer it belongs in.
+- Every public class and function needs a docstring explaining why it exists.
+  `scripts/check_docstrings.py` enforces this.
 - Update `README.md` if you change a CLI command or a design decision. The
   "Decisions worth knowing about" section is the most-read part of this repo.
+  `scripts/check_docs.py` will catch a number that no longer matches.
 - Add a line to `CHANGELOG.md` under Unreleased.
 
 ## Reporting a bug

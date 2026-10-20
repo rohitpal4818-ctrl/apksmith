@@ -168,6 +168,9 @@ jobs:
       - name: Documented claims match the repository
         run: python scripts/check_docs.py
 
+      - name: Every public symbol is documented
+        run: python scripts/check_docstrings.py
+
       - name: Ruff
         run: |
           ruff check src tests scripts

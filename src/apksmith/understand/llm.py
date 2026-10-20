@@ -81,6 +81,12 @@ class LlmUnavailable(ApkSmithError):
 
 
 def known_providers() -> list[str]:
+    """Provider names the CLI will accept, sorted for stable ``--help`` text.
+
+    Derived from the routing table rather than maintained as a second list, so
+    adding a provider cannot leave the help text advertising a name that does
+    not work.
+    """
     return sorted(ENDPOINTS)
 
 
@@ -98,6 +104,7 @@ class LlmStats:
     model: str = ""
 
     def as_dict(self) -> dict[str, Any]:
+        """Flat mapping for the CLI's run-stats block, in stable key order."""
         return {
             "provider": self.provider,
             "model": self.model,
