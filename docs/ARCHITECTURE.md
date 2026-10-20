@@ -100,6 +100,27 @@ JSON to prove the path works.
 
 Responses are cached by content hash on disk. For a free tier limited to 50
 requests a day, this is the difference between being able to iterate and not.
+The cache key covers provider, model, system prompt, user prompt, temperature
+and max tokens, so changing any of them is a miss rather than a wrong answer.
+
+### Providers are a routing table, not an abstraction layer
+
+M2 has two backends and both speak the OpenAI chat format, so there is no
+adapter hierarchy: `ENDPOINTS`, `DEFAULT_MODEL` and a per-provider environment
+variable lookup are the whole mechanism. The differences that matter are
+operational, not structural.
+
+| | OpenRouter | Groq |
+|---|---|---|
+| Free requests/day | 50 | 1,000 |
+| Free tokens/day | unpublished | 200,000 |
+| Binding limit | requests | tokens |
+
+The token limit is what actually decides how many runs you get. An
+F-Droid-sized understanding run is around 56,000 tokens across 10 calls, so
+Groq's 200,000/day buys three runs while its 1,000 requests/day would have
+allowed a hundred. Reporting usage per run matters more than reporting requests
+per run.
 
 ### Generation consults no model
 

@@ -7,7 +7,41 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **Groq as an M2 backend**, selectable with `--provider groq`. Groq's free
+  tier allows 30 requests/minute, 1,000 requests/day and 200k tokens/day, which
+  is twenty times the request allowance of OpenRouter's free tier. The default
+  model is `openai/gpt-oss-120b`, Groq's recommended replacement for the Llama
+  models it retired from the free tier in August 2026. `--model` accepts any id
+  the chosen provider serves.
+- `--provider` and `--model` on `apksmith understand run`; the mock-friendly
+  `LlmClient(provider=...)` routes endpoints, env vars and defaults per backend.
+- The `--dry-run` output now names the provider and model it would have used.
+
+### Changed
+
+- `LlmClient` docs and error messages are provider-aware. A missing key names
+  the right environment variable and the right signup URL instead of always
+  saying `OPENROUTER_API_KEY`.
+- The disk cache key now includes the provider and model, so switching backends
+  cannot replay another provider's cached answer for an identical prompt.
+
+### Fixed
+
+- **`understand` deleted the system temp directory.** Cleanup called
+  `shutil.rmtree(tmp_dir.parent)`, and because `mkdtemp()` returns
+  `<tempdir>/apksmith-m2-XXXX`, `.parent` is the user's Temp folder. Every
+  temporary file on the machine was removed after a run. It now removes only
+  its own directory. `tests/test_temp_cleanup.py` greps the package for
+  `rmtree(... .parent)` so the pattern cannot return.
+- **`role_census()` reported `{'other': N}` for every app.** It was called
+  before `rank()` populated `ClassSummary.role`, so the diagnostic always
+  claimed the classifier had matched nothing. It now ranks first, and the
+  pipeline orders the calls correctly.
+- `_cache_put` used `contextlib.suppress` without importing `contextlib`. No
+  test wrote to the cache, so the resulting `NameError` would only have
+  appeared on the first live API call.
 
 ## [0.2.0] - 2026-10-18
 

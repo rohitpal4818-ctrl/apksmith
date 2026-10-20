@@ -68,9 +68,10 @@ runs on Windows ARM via x64 emulation.
 apksmith scan app.apk
 apksmith scan app.apk --json reports/app.json --markdown reports/app.md
 
-# M2: what does it do? Needs jadx and OPENROUTER_API_KEY.
+# M2: what does it do? Needs jadx and an API key (OpenRouter or Groq).
 apksmith understand run app.apk --dry-run          # see the prompts, free
 apksmith understand run app.apk --json reports/understanding.json
+apksmith understand run app.apk --provider groq    # 1,000 req/day free
 
 # M3: spec -> project. No API key.
 apksmith generate run reports/understanding.json --out build/recon
@@ -83,6 +84,43 @@ apksmith coverage
 ```
 
 Exit codes: `0` clean, `1` error, `2` risk score ≥ 80.
+
+### Model providers for M2
+
+M2 is the only stage that calls a model. Two backends, both with a free tier:
+
+| Provider | Flag | Env var | Default model | Free tier |
+|---|---|---|---|---|
+| OpenRouter | *(default)* | `OPENROUTER_API_KEY` | `nvidia/nemotron-3-ultra-550b-a55b:free` | 20 req/min, 50 req/day |
+| Groq | `--provider groq` | `GROQ_API_KEY` | `openai/gpt-oss-120b` | 30 req/min, 1,000 req/day, 200k tokens/day |
+
+```bash
+# OpenRouter
+export OPENROUTER_API_KEY=sk-or-v1-...
+apksmith understand run app.apk
+
+# Groq
+export GROQ_API_KEY=gsk_...
+apksmith understand run app.apk --provider groq
+
+# Any other model on either backend
+apksmith understand run app.apk --provider groq --model openai/gpt-oss-20b
+```
+
+Free keys: <https://openrouter.ai/keys> and <https://console.groq.com/keys>.
+Neither needs a card.
+
+Two things to know before you budget a run:
+
+- **Responses are cached by content hash** under `.apksmith-cache/`. Re-running
+  on an unchanged APK costs nothing. The cache key includes the provider and
+  model, so switching backends does not replay another provider's answer.
+- **Tokens bind before requests do.** An F-Droid-sized run is roughly 56k
+  tokens across 10 calls. That is 3 runs/day on Groq's free tier even though
+  the request cap would allow 1,000.
+
+Groq's 8k tokens/minute limit is the practical constraint: one chunk prompt is
+around 4k tokens, so expect two calls a minute. Batch work only, not interactive.
 
 ### As an MCP server
 
@@ -113,7 +151,7 @@ apksmith/
   understand/   M2: source -> behaviour spec
     extract.py     decompiled Java -> compact class summaries
     rank.py        role classification, class selection
-    llm.py         OpenRouter client, disk cache, rate-limit reporting
+    llm.py         provider routing (OpenRouter/Groq), disk cache, rate limits
     prompt.py      prompt construction and the JSON contract
     spec.py        BehaviourSpec output model
     pipeline.py    resolve package, chunk, extract, merge, synthesise

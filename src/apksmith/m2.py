@@ -20,7 +20,7 @@ from .ingest import jadx
 from .logging_setup import configure_logging
 from .models import RiskReport
 from .understand.extract import extract_tree
-from .understand.llm import DEFAULT_MODEL, LlmClient
+from .understand.llm import DEFAULT_MODEL, LlmClient, known_providers
 from .understand.pipeline import understand
 from .understand.prompt import SYSTEM, extraction_prompt
 from .understand.rank import role_census, select
@@ -35,12 +35,12 @@ cli = typer.Typer(
 @cli.command()
 def run(
     apk: Path = typer.Argument(..., exists=True, help="Path to the .apk"),
-    report_json: Path = typer.Option(
+    report_json: Path | None = typer.Option(
         None, "--report", help="Reuse a saved M1 JSON report instead of re-running M1"
     ),
     out: Path = typer.Option(Path("reports/understanding.md"), "--out", help="Markdown output"),
-    json_out: Path = typer.Option(None, "--json", help="Also write the spec as JSON"),
-    decompiled: Path = typer.Option(
+    json_out: Path | None = typer.Option(None, "--json", help="Also write the spec as JSON"),
+    decompiled: Path | None = typer.Option(
         None, "--decompiled", help="Reuse an existing jadx output directory"
     ),
     keep_decompiled: bool = typer.Option(
@@ -49,7 +49,16 @@ def run(
     max_classes: int = typer.Option(60, "--max-classes", help="Class budget"),
     per_chunk: int = typer.Option(12, "--per-chunk", help="Classes per model call"),
     per_role_cap: int = typer.Option(20, "--per-role-cap", help="Max classes per role"),
-    model: str = typer.Option(DEFAULT_MODEL, "--model", help="Model id"),
+    provider: str = typer.Option(
+        "openrouter",
+        "--provider",
+        help=f"LLM provider: {', '.join(known_providers())}",
+    ),
+    model: str | None = typer.Option(
+        None,
+        "--model",
+        help="Model id. Defaults to the provider's recommended model.",
+    ),
     dry_run: bool = typer.Option(
         False, "--dry-run", help="Build and show the prompts without calling the model"
     ),
@@ -57,6 +66,27 @@ def run(
 ) -> None:
     """Understand what an APK does, and write a behaviour spec."""
     configure_logging(verbose=verbose)
+
+    # Validate the provider before doing any work. The dict lookups below would
+    # otherwise raise a bare KeyError, and only after jadx had spent a minute
+    # decompiling -- a wasted minute and an unhelpful traceback.
+    if provider not in known_providers():
+        raise typer.BadParameter(
+            f"unknown provider {provider!r}; choose from {', '.join(known_providers())}",
+            param_hint="--provider",
+        )
+
+    # Claiming to "use existing sources" for a path that is not there just
+    # moves the failure a few steps later, where it reads as a parser bug.
+    # Checked here, before M1, so a typo costs nothing.
+    if decompiled is not None and not decompiled.is_dir():
+        typer.secho(
+            f"--decompiled points at {decompiled}, which is not a directory.",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     from .app import analyse
 
     # ---- M1: static report ------------------------------------------------ #
@@ -106,7 +136,9 @@ def run(
         if dry_run:
             summaries = extract_tree(source_root, package_prefixes=prefixes)
             selected = select(summaries, max_classes=max_classes, per_role_cap=per_role_cap)
-            typer.echo(f"\nclasses in package : {len(summaries):,}")
+            typer.echo(f"\nprovider           : {provider}")
+            typer.echo(f"model              : {model or DEFAULT_MODEL[provider]}")
+            typer.echo(f"classes in package : {len(summaries):,}")
             typer.echo(f"roles              : {role_census(summaries)}")
             typer.echo(f"selected           : {len(selected)}")
             typer.echo(f"prompt size        : "
@@ -118,15 +150,23 @@ def run(
             return
 
         # ---- M2 ------------------------------------------------------------ #
+        env_name = {
+            "openrouter": "OPENROUTER_API_KEY",
+            "groq": "GROQ_API_KEY",
+        }[provider]
         client = LlmClient(
-            api_key=os.environ.get("OPENROUTER_API_KEY"),
+            api_key=os.environ.get(env_name),
+            provider=provider,
             model=model,
         )
         if not client.api_key:
+            key_url = {
+                "openrouter": "https://openrouter.ai/keys",
+                "groq": "https://console.groq.com/keys",
+            }[provider]
             typer.secho(
-                "No OPENROUTER_API_KEY set. Get a free key at "
-                "https://openrouter.ai/keys , then:\n"
-                "  $env:OPENROUTER_API_KEY = 'sk-or-v1-...'\n"
+                f"No {env_name} set. Get a free key at {key_url}, then:\n"
+                f"  $env:{env_name} = '...'\n"
                 "Or run with --dry-run to see the prompts without spending requests.",
                 fg=typer.colors.RED,
                 err=True,

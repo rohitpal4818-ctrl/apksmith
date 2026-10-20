@@ -1,20 +1,32 @@
 """
-OpenRouter client for the understanding layer.
+Multi-provider LLM client for the understanding layer.
 
-Deliberately small, and built around three constraints specific to free
-tier access:
+Providers
+---------
+``openrouter``
+    Default. Broad model catalogue, but the free tier is 20 requests/minute
+    and 50 requests/day without a one-time credit purchase.
 
-1. **Rate limits are real.** 20 requests/minute, 50/day without credits. The
-   client surfaces the remaining budget instead of silently failing.
+``groq``
+    Far more generous free tier: 30 requests/minute, 1,000 requests/day and
+    200,000 tokens/day, with no card required. The model that matters is
+    ``openai/gpt-oss-120b`` -- OpenAI's open-weight mixture-of-experts, which
+    Groq recommends as the replacement for the Llama models it retired from
+    the free tier in August 2026.
 
-2. **Responses are cached by content hash.** Re-running the pipeline on an
-   unchanged APK must cost nothing. For a student on a free tier this is the
-   difference between being able to iterate and not.
+Three constraints shape this module, and they apply to every provider:
 
-3. **The model is not trusted.** Every response is validated into a Pydantic
-   model, and a response that will not parse is retried with a repair prompt
-   before being given up on. Small free models produce malformed JSON often
-   enough that this is not optional.
+1. **Rate limits are real.** Both providers publish generous-looking limits
+   that a large prompt can exhaust in one call, so every response carries its
+   usage back to the caller and ``budget()`` reports what remains.
+
+2. **Responses are cached by content hash.** Re-running on an unchanged APK
+   must cost nothing. On a free tier this is the difference between being
+   able to iterate and not.
+
+3. **The model is not trusted.** Responses are parsed defensively, and a
+   response that will not parse is retried with a repair prompt. Small models
+   produce malformed JSON often enough that this is not optional.
 """
 
 from __future__ import annotations
@@ -32,15 +44,44 @@ import requests
 
 from ..errors import ApkSmithError
 
-#: A model that is good at reasoning and free. Verified present on OpenRouter's
-#: free tier. Override with --model if the roster changes.
-DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
+#: Default model per provider.
+DEFAULT_MODEL = {
+    "openrouter": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    # Groq's replacement for the retired Llama 3.3 70B. Best available for
+    # reasoning and code, which is what the understanding stage needs.
+    "groq": "openai/gpt-oss-120b",
+}
 
-ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
+#: Groq's models are OpenAI-compatible, so the wire format matches.
+ENDPOINTS = {
+    "openrouter": "https://openrouter.ai/api/v1/chat/completions",
+    "groq": "https://api.groq.com/openai/v1/chat/completions",
+}
+
+BUDGET_ENDPOINTS = {
+    "openrouter": "https://openrouter.ai/api/v1/key",
+}
+
+#: Free-tier guidance, quoted when a 429 comes back. Being specific about the
+#: numbers saves the user digging through documentation.
+FREE_TIER_HELP = {
+    "openrouter": (
+        "The free tier allows 20 requests per minute and 50 per day. A one-time "
+        "$10 credit purchase raises the daily limit to 1,000, permanently."
+    ),
+    "groq": (
+        "Groq's free plan allows 30 requests per minute, 1,000 per day, and "
+        "200,000 tokens per day. Whichever limit is reached first applies."
+    ),
+}
 
 
 class LlmUnavailable(ApkSmithError):
     """No API key, or the provider could not be reached."""
+
+
+def known_providers() -> list[str]:
+    return sorted(ENDPOINTS)
 
 
 @dataclass
@@ -52,36 +93,56 @@ class LlmStats:
     prompt_tokens: int = 0
     completion_tokens: int = 0
     failures: int = 0
-    model: str = DEFAULT_MODEL
+    retries: int = 0
+    provider: str = "openrouter"
+    model: str = ""
 
     def as_dict(self) -> dict[str, Any]:
         return {
+            "provider": self.provider,
+            "model": self.model,
             "requests": self.requests,
             "cached_responses": self.cached,
             "prompt_tokens": self.prompt_tokens,
             "completion_tokens": self.completion_tokens,
+            "retries": self.retries,
             "failures": self.failures,
-            "model": self.model,
         }
 
 
 @dataclass
 class LlmClient:
-    """Minimal OpenRouter chat client with disk caching."""
+    """Chat client with per-provider routing, disk caching and JSON salvage."""
 
     api_key: str | None = None
-    model: str = DEFAULT_MODEL
+    model: str | None = None
+    provider: str = "openrouter"
     cache_dir: Path = field(default_factory=lambda: Path(".apksmith-cache"))
     timeout: int = 120
+    max_retries: int = 3
     stats: LlmStats = field(default_factory=LlmStats)
 
     def __post_init__(self) -> None:
-        self.api_key = self.api_key or os.environ.get("OPENROUTER_API_KEY")
+        if self.provider not in ENDPOINTS:
+            raise LlmUnavailable(
+                f"Unknown provider {self.provider!r}. "
+                f"Known providers: {', '.join(known_providers())}"
+            )
+        if self.model is None:
+            self.model = DEFAULT_MODEL[self.provider]
+        self.stats.provider = self.provider
         self.stats.model = self.model
+
+        if self.api_key is None:
+            env_name = {
+                "openrouter": "OPENROUTER_API_KEY",
+                "groq": "GROQ_API_KEY",
+            }[self.provider]
+            self.api_key = os.environ.get(env_name)
 
     # -- cache ------------------------------------------------------------ #
     def _cache_path(self, key: str) -> Path:
-        # Two-level fan-out keeps directories small on long projects.
+        # Two-level fan-out keeps directories small over a long project.
         digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
         return self.cache_dir / digest[:2] / f"{digest}.json"
 
@@ -105,19 +166,37 @@ class LlmClient:
 
     # -- budget ----------------------------------------------------------- #
     def budget(self) -> dict[str, Any]:
-        """Remaining free-tier requests for this key, or {} if unavailable."""
-        if not self.api_key:
+        """Remaining free-tier allowance, or ``{}`` when the provider has no
+        budget endpoint or no key is configured."""
+        endpoint = BUDGET_ENDPOINTS.get(self.provider)
+        if not endpoint or not self.api_key:
             return {}
         try:
             r = requests.get(
-                "https://openrouter.ai/api/v1/key",
+                endpoint,
                 headers={"Authorization": f"Bearer {self.api_key}"},
                 timeout=20,
             )
             r.raise_for_status()
-            return r.json().get("data", {}).get("free_model_daily_requests", {})
+            data = r.json().get("data", {})
+            remaining = data.get("free_model_daily_requests")
+            if remaining is None:
+                return {}
+            return remaining
         except Exception:
             return {}
+
+    # -- headers ---------------------------------------------------------- #
+    def _headers(self) -> dict[str, str]:
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        if self.provider == "openrouter":
+            # OpenRouter uses these for dashboard attribution.
+            headers["HTTP-Referer"] = "https://github.com/apksmith"
+            headers["X-Title"] = "APKSmith"
+        return headers
 
     # -- completion ------------------------------------------------------- #
     def complete(
@@ -131,16 +210,27 @@ class LlmClient:
     ) -> str:
         """Send one chat completion and return the assistant's text.
 
-        Raises LlmUnavailable if there is no key or the request cannot be made.
+        Retries on 429 and on 5xx with exponential backoff, because a free
+        tier hitting a transient limit is the normal case, not an exception.
         """
         if not self.api_key:
+            env_name = {
+                "openrouter": "OPENROUTER_API_KEY",
+                "groq": "GROQ_API_KEY",
+            }[self.provider]
             raise LlmUnavailable(
-                "No OpenRouter API key. Get one free at "
-                "https://openrouter.ai/keys and set OPENROUTER_API_KEY."
+                f"No API key for {self.provider}. Set {env_name}, or pass one "
+                f"explicitly. Free keys: "
+                + (
+                    "https://openrouter.ai/keys"
+                    if self.provider == "openrouter"
+                    else "https://console.groq.com/keys"
+                )
             )
 
         cache_key = json.dumps(
             {
+                "provider": self.provider,
                 "model": self.model,
                 "system": system,
                 "user": user,
@@ -165,52 +255,87 @@ class LlmClient:
             "max_tokens": max_tokens,
         }
         if json_mode:
-            # Free models vary in how well they honour this, but it improves
-            # the odds considerably and costs nothing.
+            # Small models drift badly without this. Groq additionally
+            # supports json_schema, which is stricter, but json_object is
+            # portable across both providers and our parser handles the rest.
             payload["response_format"] = {"type": "json_object"}
 
-        try:
-            resp = requests.post(
-                ENDPOINT,
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://github.com/apksmith",
-                    "X-Title": "APKSmith",
-                },
-                json=payload,
-                timeout=self.timeout,
-            )
-        except requests.RequestException as exc:
-            raise LlmUnavailable(f"Could not reach OpenRouter: {exc}") from exc
+        url = ENDPOINTS[self.provider]
+        last_error = "no attempt made"
 
-        if resp.status_code == 429:
-            self.stats.failures += 1
-            raise LlmUnavailable(
-                "Rate limited by OpenRouter. The free tier allows 20 requests "
-                "per minute and 50 per day. Wait, or add $10 in credits for "
-                "1000/day."
-            )
-        if resp.status_code >= 400:
-            self.stats.failures += 1
-            raise LlmUnavailable(
-                f"OpenRouter returned {resp.status_code}: {resp.text[:300]}"
-            )
+        for attempt in range(self.max_retries):
+            try:
+                resp = requests.post(
+                    url,
+                    headers=self._headers(),
+                    json=payload,
+                    timeout=self.timeout,
+                )
+            except requests.RequestException as exc:
+                last_error = f"could not reach {self.provider}: {exc}"
+                self._sleep(attempt)
+                self.stats.retries += 1
+                continue
 
-        data = resp.json()
-        usage = data.get("usage") or {}
-        self.stats.requests += 1
-        self.stats.prompt_tokens += int(usage.get("prompt_tokens") or 0)
-        self.stats.completion_tokens += int(usage.get("completion_tokens") or 0)
+            if resp.status_code == 429:
+                # Respect Retry-After when the provider sends one.
+                wait = float(resp.headers.get("retry-after") or 0) or 0.0
+                if not wait:
+                    wait = 2.0 * (2**attempt)
+                self.stats.retries += 1
+                last_error = (
+                    f"rate limited by {self.provider}. {FREE_TIER_HELP[self.provider]}"
+                )
+                if attempt < self.max_retries - 1:
+                    self._sleep(attempt, forced=wait)
+                    continue
+                self.stats.failures += 1
+                raise LlmUnavailable(last_error)
 
-        try:
-            content = data["choices"][0]["message"]["content"]
-        except (KeyError, IndexError) as exc:
-            self.stats.failures += 1
-            raise LlmUnavailable(f"Malformed response from OpenRouter: {exc}") from exc
+            if resp.status_code >= 500:
+                self.stats.retries += 1
+                last_error = f"{self.provider} returned {resp.status_code}"
+                if attempt < self.max_retries - 1:
+                    self._sleep(attempt)
+                    continue
+                self.stats.failures += 1
+                raise LlmUnavailable(last_error)
 
-        self._cache_put(cache_key, content)
-        return content
+            if resp.status_code >= 400:
+                self.stats.failures += 1
+                raise LlmUnavailable(
+                    f"{self.provider} returned {resp.status_code}: {resp.text[:400]}"
+                )
+
+            data = resp.json()
+            usage = data.get("usage") or {}
+            self.stats.requests += 1
+            self.stats.prompt_tokens += int(usage.get("prompt_tokens") or 0)
+            self.stats.completion_tokens += int(usage.get("completion_tokens") or 0)
+
+            try:
+                content = data["choices"][0]["message"]["content"]
+            except (KeyError, IndexError, TypeError) as exc:
+                last_error = f"malformed response from {self.provider}: {exc}"
+                self.stats.retries += 1
+                if attempt < self.max_retries - 1:
+                    self._sleep(attempt)
+                    continue
+                self.stats.failures += 1
+                raise LlmUnavailable(last_error) from exc
+
+            self._cache_put(cache_key, content)
+            return content
+
+        self.stats.failures += 1
+        raise LlmUnavailable(last_error)
+
+    @staticmethod
+    def _sleep(attempt: int, forced: float | None = None) -> None:
+        import time
+
+        delay = forced if forced else 1.5 * (2**attempt)
+        time.sleep(min(delay, 30.0))
 
 
 # --------------------------------------------------------------------------- #
@@ -219,9 +344,10 @@ class LlmClient:
 def parse_json_loose(text: str) -> dict[str, Any] | None:
     """Pull a JSON object out of a model response.
 
-    Small models wrap JSON in prose, fence it in markdown, or emit trailing
-    commas. Rather than trusting the model to be tidy, we peel it off in
-    stages: direct parse, then fenced block, then the outermost brace span.
+    Models wrap JSON in prose, fence it in markdown, or emit trailing commas.
+    Rather than trusting tidy output, peel it off in stages: direct parse,
+    then a fenced block, then the outermost brace span, then trailing-comma
+    repair.
     """
     if not text:
         return None
@@ -232,10 +358,9 @@ def parse_json_loose(text: str) -> dict[str, Any] | None:
     except json.JSONDecodeError:
         pass
 
-    # ```json ... ```
-    fence_start = text.find("```")
-    if fence_start != -1:
-        rest = text[fence_start + 3:]
+    fence = text.find("```")
+    if fence != -1:
+        rest = text[fence + 3 :]
         if rest[:4].lower() == "json":
             rest = rest[4:]
         end = rest.find("```")
@@ -247,9 +372,7 @@ def parse_json_loose(text: str) -> dict[str, Any] | None:
         except json.JSONDecodeError:
             pass
 
-    # Outermost {...} span.
-    start = text.find("{")
-    end = text.rfind("}")
+    start, end = text.find("{"), text.rfind("}")
     if start != -1 and end > start:
         candidate = text[start : end + 1]
         try:
@@ -257,7 +380,7 @@ def parse_json_loose(text: str) -> dict[str, Any] | None:
             return value if isinstance(value, dict) else None
         except json.JSONDecodeError:
             pass
-        # Last resort: strip trailing commas before } or ]
+        # Last resort: strip trailing commas before } or ].
         repaired = re.sub(r",\s*([}\]])", r"\1", candidate)
         try:
             value = json.loads(repaired)

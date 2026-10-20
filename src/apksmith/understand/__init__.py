@@ -11,7 +11,13 @@
 from __future__ import annotations
 
 from .extract import ClassSummary, extract_tree, summarise_class
-from .llm import DEFAULT_MODEL, LlmClient, LlmStats, parse_json_loose
+from .llm import (
+    DEFAULT_MODEL,
+    LlmClient,
+    LlmStats,
+    known_providers,
+    parse_json_loose,
+)
 from .pipeline import UnderstandResult, understand
 from .rank import classify, rank, role_census, select
 from .spec import (
@@ -37,6 +43,7 @@ __all__ = [
     "UnderstandResult",
     "classify",
     "extract_tree",
+    "known_providers",
     "parse_json_loose",
     "rank",
     "role_census",
