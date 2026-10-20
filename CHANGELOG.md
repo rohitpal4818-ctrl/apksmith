@@ -28,6 +28,11 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Provider details live in one table.** The provider -> environment variable
+  and provider -> signup URL mappings were written out three times. They are
+  now `KEY_ENV` / `KEY_URL` in `understand/llm.py`, with `key_env_var()` and
+  `key_url()` as the accessors, and a test asserting every provider in
+  `ENDPOINTS` has an entry in both.
 - **CLI modules are named for what they do.** `m2.py` and `m3_m5.py` became
   `commands/understand.py`, `commands/generate.py` and
   `commands/evaluate.py`. A file called `m3_m5.py` describes a schedule, not a
@@ -47,6 +52,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`apk_understand` sent the model table where the API expects a model name.**
+  The MCP tool called `LlmClient(model=DEFAULT_MODEL)`, so the request body
+  carried a dict in the `model` field and would have failed after the app had
+  already been decompiled. It also hard-coded `OPENROUTER_API_KEY`, so a Groq
+  user could not use the tool at all. It now takes a `provider` argument and
+  lets the client resolve both the model and the key.
 - **`generate` marked every nested file as skipped.** The "was this written"
   check compared a generated relative path (`lib/screens/home.dart`) against a
   set of basenames (`home.dart`), so the match never succeeded below the top

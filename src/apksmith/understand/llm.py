@@ -58,6 +58,31 @@ ENDPOINTS = {
     "groq": "https://api.groq.com/openai/v1/chat/completions",
 }
 
+#: Environment variable that holds each provider's key. Adding a provider
+#: without adding an entry here used to produce a bare KeyError deep in the
+#: client; the set equality is asserted in tests/test_providers.py.
+KEY_ENV = {
+    "openrouter": "OPENROUTER_API_KEY",
+    "groq": "GROQ_API_KEY",
+}
+
+#: Where a new user gets a key, quoted in "no key" errors.
+KEY_URL = {
+    "openrouter": "https://openrouter.ai/keys",
+    "groq": "https://console.groq.com/keys",
+}
+
+
+def key_env_var(provider: str) -> str:
+    """Name of the environment variable holding ``provider``'s API key."""
+    return KEY_ENV[provider]
+
+
+def key_url(provider: str) -> str:
+    """Signup URL for ``provider``, for the message shown when a key is missing."""
+    return KEY_URL[provider]
+
+
 BUDGET_ENDPOINTS = {
     "openrouter": "https://openrouter.ai/api/v1/key",
 }
@@ -141,11 +166,7 @@ class LlmClient:
         self.stats.model = self.model
 
         if self.api_key is None:
-            env_name = {
-                "openrouter": "OPENROUTER_API_KEY",
-                "groq": "GROQ_API_KEY",
-            }[self.provider]
-            self.api_key = os.environ.get(env_name)
+            self.api_key = os.environ.get(key_env_var(self.provider))
 
     # -- cache ------------------------------------------------------------ #
     def _cache_path(self, key: str) -> Path:
@@ -223,18 +244,10 @@ class LlmClient:
         tier hitting a transient limit is the normal case, not an exception.
         """
         if not self.api_key:
-            env_name = {
-                "openrouter": "OPENROUTER_API_KEY",
-                "groq": "GROQ_API_KEY",
-            }[self.provider]
             raise LlmUnavailable(
-                f"No API key for {self.provider}. Set {env_name}, or pass one "
-                f"explicitly. Free keys: "
-                + (
-                    "https://openrouter.ai/keys"
-                    if self.provider == "openrouter"
-                    else "https://console.groq.com/keys"
-                )
+                f"No API key for {self.provider}. Set "
+                f"{key_env_var(self.provider)}, or pass one explicitly. "
+                f"Free keys: {key_url(self.provider)}"
             )
 
         cache_key = json.dumps(

@@ -305,3 +305,48 @@ def test_loose_json_parsing_survives_small_model_output(raw):
 def test_loose_json_rejects_non_objects():
     assert parse_json_loose("[1, 2, 3]") is None
     assert parse_json_loose("no json here") is None
+
+
+def test_every_provider_has_a_model_key_and_url():
+    """Adding a provider to ENDPOINTS must not leave a lookup that KeyErrors.
+
+    Every table below is indexed by provider name, in the client and in both
+    front ends. A missing entry fails at the moment a user runs the command,
+    with a traceback that names a dict rather than the real problem.
+    """
+    from apksmith.understand.llm import (
+        DEFAULT_MODEL,
+        ENDPOINTS,
+        KEY_ENV,
+        KEY_URL,
+    )
+
+    providers = set(ENDPOINTS)
+    assert set(DEFAULT_MODEL) == providers
+    assert set(KEY_ENV) == providers
+    assert set(KEY_URL) == providers
+
+
+def test_key_helpers_return_the_provider_specific_values():
+    from apksmith.understand.llm import key_env_var, key_url
+
+    assert key_env_var("openrouter") == "OPENROUTER_API_KEY"
+    assert key_env_var("groq") == "GROQ_API_KEY"
+    assert key_url("openrouter").startswith("https://openrouter.ai/")
+    assert key_url("groq").startswith("https://console.groq.com/")
+
+
+def test_client_reports_its_own_missing_key(monkeypatch):
+    """The error must name the variable for the provider that was asked for."""
+    from apksmith.understand.llm import LlmClient, LlmUnavailable
+
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    client = LlmClient(provider="groq")
+    assert client.model == "openai/gpt-oss-120b", "model resolved from the table"
+
+    with pytest.raises(LlmUnavailable) as excinfo:
+        client.complete("system", "hello")
+
+    message = str(excinfo.value)
+    assert "GROQ_API_KEY" in message
+    assert "OPENROUTER" not in message

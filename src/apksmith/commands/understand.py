@@ -22,7 +22,13 @@ from ..ingest import jadx
 from ..logging_setup import configure_logging
 from ..models import RiskReport
 from ..understand.extract import extract_tree
-from ..understand.llm import DEFAULT_MODEL, LlmClient, known_providers
+from ..understand.llm import (
+    DEFAULT_MODEL,
+    LlmClient,
+    key_env_var,
+    key_url,
+    known_providers,
+)
 from ..understand.pipeline import understand
 from ..understand.prompt import SYSTEM, extraction_prompt
 from ..understand.rank import role_census, select
@@ -160,23 +166,16 @@ def run(
             return
 
         # ---- M2 ------------------------------------------------------------ #
-        env_name = {
-            "openrouter": "OPENROUTER_API_KEY",
-            "groq": "GROQ_API_KEY",
-        }[provider]
         client = LlmClient(
-            api_key=os.environ.get(env_name),
+            api_key=os.environ.get(key_env_var(provider)),
             provider=provider,
             model=model,
         )
         if not client.api_key:
-            key_url = {
-                "openrouter": "https://openrouter.ai/keys",
-                "groq": "https://console.groq.com/keys",
-            }[provider]
             typer.secho(
-                f"No {env_name} set. Get a free key at {key_url}, then:\n"
-                f"  $env:{env_name} = '...'\n"
+                f"No {key_env_var(provider)} set. Get a free key at "
+                f"{key_url(provider)}, then:\n"
+                f"  $env:{key_env_var(provider)} = '...'\n"
                 "Or run with --dry-run to see the prompts without spending requests.",
                 fg=typer.colors.RED,
                 err=True,

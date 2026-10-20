@@ -273,24 +273,41 @@ def build_server():
         apk_path: str,
         max_classes: int = 60,
         per_chunk: int = 12,
+        provider: str = "openrouter",
     ) -> str:
-        """Produce a behaviour specification. Requires OPENROUTER_API_KEY.
+        """Produce a behaviour specification. Requires an API key.
 
         This is the only tool that calls a model. It chunks the app's own code,
         describes each chunk, then merges the results. Consumes free-tier rate
         limit, and responses are cached on disk so repeats are free.
+
+        ``provider`` is ``openrouter`` (default) or ``groq``. Each one reads its
+        own environment variable, ``OPENROUTER_API_KEY`` or ``GROQ_API_KEY``.
         """
         from .app import analyse
-        from .understand.llm import DEFAULT_MODEL, LlmClient
+        from .understand.llm import LlmClient, key_env_var, key_url, known_providers
         from .understand.pipeline import resolve_app_prefixes, understand
 
-        if not os.environ.get("OPENROUTER_API_KEY"):
+        if provider not in known_providers():
+            return json.dumps(
+                {
+                    "error": "unknown provider",
+                    "hint": f"choose one of: {', '.join(known_providers())}",
+                }
+            )
+
+        # Let the client resolve the model name and the environment variable.
+        # Passing DEFAULT_MODEL here instead would put a dict where the API
+        # expects a string, and the request would fail after the decompile.
+        client = LlmClient(provider=provider)
+
+        if not client.api_key:
             return json.dumps(
                 {
                     "error": "no API key",
                     "hint": (
-                        "Set OPENROUTER_API_KEY. Get a free key at "
-                        "https://openrouter.ai/keys (no card required)."
+                        f"Set {key_env_var(provider)}. Get a free key at "
+                        f"{key_url(provider)}."
                     ),
                 }
             )
@@ -303,7 +320,6 @@ def build_server():
             )
 
         report = analyse(apk_path)
-        client = LlmClient(model=DEFAULT_MODEL)
 
         try:
             result = understand(
