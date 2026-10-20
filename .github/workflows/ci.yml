@@ -61,13 +61,37 @@ jobs:
       - name: Fetch the sample APK
         run: bash scripts/fetch_samples.sh
 
+      - name: Set up Java (jadx needs a JRE)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
       - name: Install jadx
+        # The release zip extracts bin/ and lib/ at the TOP LEVEL -- there is
+        # no jadx-<version>/ directory. An earlier version appended
+        # "$PWD/jadx-${JADX_VERSION}/bin" to GITHUB_PATH, which does not
+        # exist, so jadx was invisible to the next step.
+        #
+        # -f makes curl fail on an HTTP error instead of writing an error page
+        # into jadx.zip (which then fails as a corrupt archive, a misleading
+        # message). The explicit checks below mean a failure names itself.
         run: |
+          set -euo pipefail
           JADX_VERSION=1.5.6
-          curl -L -o jadx.zip \
-            "https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"
-          unzip -q jadx.zip
-          echo "$PWD/jadx-${JADX_VERSION}/bin" >> "$GITHUB_PATH"
+          URL="https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"
+          echo "downloading $URL"
+          curl -fsSL --retry 3 --retry-delay 2 -o jadx.zip "$URL"
+          ls -l jadx.zip
+          unzip -q jadx.zip -d jadx-dist
+          chmod +x jadx-dist/bin/jadx
+          echo "$PWD/jadx-dist/bin" >> "$GITHUB_PATH"
+          echo "--- jadx version ---"
+          ./jadx-dist/bin/jadx --version
+
+      - name: jadx is callable as a command
+        # Proves the GITHUB_PATH export worked, before any analysis depends on it.
+        run: jadx --version
 
       - name: Static analysis on a real APK
         run: |
