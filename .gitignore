@@ -17,6 +17,11 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
+# Secrets. A key belongs in the environment, never in the tree.
+.env
+.env.*
+!.env.example
+
 # Local scratch output (sample reports ARE committed)
 out/
 

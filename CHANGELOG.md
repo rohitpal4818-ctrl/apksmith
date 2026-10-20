@@ -24,6 +24,16 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   real reduction is **93.6%**. The README and ARCHITECTURE now quote the
   reproducible number and say how to reproduce it.
 
+### Security
+
+- **A guard against committing a live key.** `tests/test_no_secrets.py` scans
+  every tracked text file for the shape of a real key from the providers this
+  project can use, and a planted key fails the suite naming the file.
+  `.env` and `.env.*` are now ignored, so a key kept for local runs cannot be
+  added by accident; `.env.example` stays trackable. No real key has ever been
+  committed — all 18 commits were scanned, and only placeholders such as
+  `sk-or-v1-...` appear in the documentation and tests.
+
 ## [0.3.0] - 2026-10-20
 
 ### Added
