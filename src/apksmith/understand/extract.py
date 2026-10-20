@@ -11,8 +11,9 @@ Raw jadx output is mostly noise. A single 15 KB Kotlin class decompiles to:
 - and only then the handful of lines that actually say what the class does
 
 Feeding that to a language model wastes most of the context window on
-characters that carry no meaning. Measured on F-Droid, filtering removes
-roughly 85% of the bytes while keeping every behaviourally relevant line.
+characters that carry no meaning. Measured on F-Droid 2.0.1 with jadx 1.5.6:
+990 files totalling 10.9 MB become 705 KB of summaries, so filtering removes
+93.6% of the bytes while keeping every behaviourally relevant line.
 
 What we keep, in priority order:
 

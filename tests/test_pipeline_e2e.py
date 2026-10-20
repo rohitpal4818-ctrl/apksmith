@@ -366,3 +366,101 @@ def test_generated_project_from_pipeline_spec(decompiled_tree: Path, tmp_path: P
     assert (tmp_path / "lib/router.dart").exists()
     # The screen named by the stub must have produced a file.
     assert (tmp_path / "lib/screens/expense_list_screen.dart").exists()
+
+
+# --------------------------------------------------------------------------- #
+# Obfuscated input
+# --------------------------------------------------------------------------- #
+#: A tree whose every identifier is meaningless. String constants survive R8,
+#: which is the only reason a static tool has anything to work with at all.
+OBFUSCATED = {
+    "a": """\
+package a.b;
+
+public class a extends android.app.Activity {
+    private b c = new b();
+
+    protected void onCreate(android.os.Bundle d) {
+        c.a("https://api.example.test/v1/items");
+    }
+}
+""",
+    "b": """\
+package a.b;
+
+public class b {
+    public void a(String u) { }
+}
+""",
+    "c": """\
+package a.b;
+
+public class c {
+    public int a;
+    public String b;
+}
+""",
+    "d": """\
+package a.b;
+
+public class d {
+    public void a() { }
+}
+""",
+}
+
+
+def _obfuscated_report() -> RiskReport:
+    """The same shape as `_report`, but everything nameable is a single letter."""
+    base = _report()
+    return base.model_copy(
+        update={
+            "identity": base.identity.model_copy(
+                update={"package": "a.b", "main_activity": "a.b.a"}
+            ),
+            "components": [Component(kind="activity", name="a.b.a")],
+        }
+    )
+
+
+def test_pipeline_survives_a_fully_obfuscated_tree(tmp_path: Path):
+    """Obfuscation must degrade the result, not crash it.
+
+    This is the limit of name-based ranking stated as a test. With every
+    identifier reduced to one letter, role classification has nothing to match,
+    so every class lands in "other" and the model receives names it cannot
+    interpret. Two things must still hold: the string literals survive (R8 does
+    not rename them, and they are most of the signal), and the pipeline still
+    produces a spec instead of sending nothing.
+    """
+    from apksmith.understand.extract import extract_tree
+
+    root = tmp_path / "jadx"
+    package = root / "sources" / "a" / "b"
+    package.mkdir(parents=True)
+    for name, source in OBFUSCATED.items():
+        (package / f"{name}.java").write_text(source, encoding="utf-8")
+
+    report = _obfuscated_report()
+    prefixes = resolve_app_prefixes(report, root, min_classes=2)
+    assert prefixes == ["a/b"], "obfuscated package was not found"
+
+    summaries = extract_tree(root, package_prefixes=prefixes)
+    assert summaries, "every obfuscated class was dropped"
+    assert {s.role for s in summaries} == {"other"}, (
+        "a one-letter class name must not be classified as a screen or a repository"
+    )
+
+    literals = [text for s in summaries for text in s.strings]
+    assert any("api.example.test" in text for text in literals), (
+        "string literals survive obfuscation; losing them loses the last signal"
+    )
+
+    client = StubClient()
+    result = understand(report, root, client, package_prefixes=prefixes)
+
+    assert result.spec.screens, "no spec was produced from an obfuscated tree"
+    assert result.classes_sent >= 1, "nothing reached the model"
+    assert any("a.b" in prompt for prompt in client.prompts), (
+        "the model was not told which classes it was looking at"
+    )

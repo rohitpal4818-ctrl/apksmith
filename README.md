@@ -221,9 +221,10 @@ code path reaches it.
 classes belong to the app; the rest is Compose, Kotlin, bouncycastle and
 friends. Filtering by package before spending any tokens is the single
 biggest cost saving in the pipeline. The surviving decompiled text is then
-reduced by roughly 85% by stripping `@Metadata` blobs, framework imports and
-synthetic lambda classes. That 85% figure is a one-off measurement in
-`understand/extract.py`; it is not asserted in CI.
+reduced by stripping `@Metadata` blobs, framework imports and synthetic lambda
+classes. Measured on F-Droid 2.0.1 with jadx 1.5.6: 990 files totalling 10.9 MB
+become 705 KB of summaries, a **93.6%** reduction. That figure is re-measurable
+with `extract_tree` but is not asserted in CI.
 
 **The manifest package is not a source prefix.** F-Droid declares
 `org.fdroid.fdroid`, but its launcher and most of its code live under
@@ -251,7 +252,7 @@ is a test asserting F-Droid does not score above 95.
 ## Testing
 
 ```bash
-pytest                    # 195 tests, no key or network needed
+pytest                    # 196 tests, no key or network needed
 ruff check src tests      # lint
 ruff format src tests     # format
 ```
@@ -318,9 +319,10 @@ apksmith generate run evaluation/example_spec.json --out build/recon
 
 Next steps, in order of value:
 
-1. Run M2 on an **obfuscated** app. The committed live run used an unobfuscated
-   F-Droid build; short class names may leave far less for the model to work
-   with, and that is the claim most likely to break.
+1. Run M2 on a **real obfuscated APK**. A synthetic tree whose identifiers are
+   all one letter is covered by a test (structure-level obfuscation, the case
+   that breaks name-based ranking), but no shipped app has been through it. The
+   committed live run used an unobfuscated F-Droid build.
 2. Send one request through the Groq backend. The wiring is tested with a stub,
    not with Groq itself.
 3. Grow the evaluation suite past two apps. Two is a demonstration, not a

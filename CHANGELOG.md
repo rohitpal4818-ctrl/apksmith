@@ -7,6 +7,23 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **An obfuscated-tree test for M2.** A tree whose every identifier is one
+  letter, run through extract, rank, select and the pipeline. It pins the limit
+  rather than pretending there is none: role classification has nothing to
+  match, so every class lands in `other`, but string literals survive and a
+  spec is still produced. No shipped obfuscated APK has been tested yet, and
+  the roadmap says so.
+
+### Fixed
+
+- **The extraction ratio was understated.** `extract.py` claimed roughly 85%
+  on the strength of a one-off measurement. Re-measured on F-Droid 2.0.1 with
+  jadx 1.5.6: 990 files totalling 10.9 MB become 705 KB of summaries, so the
+  real reduction is **93.6%**. The README and ARCHITECTURE now quote the
+  reproducible number and say how to reproduce it.
+
 ## [0.3.0] - 2026-10-20
 
 ### Added

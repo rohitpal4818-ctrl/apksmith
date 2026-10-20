@@ -95,11 +95,12 @@ kilobytes of escaped binary, forty framework imports, and dozens of
 compiler-generated lambda classes. Feeding that to a model wastes the context
 window on characters that mean nothing.
 
-`understand/extract.py` reduces measured text by roughly **85%** on F-Droid,
-keeping the class declaration, field names, method signatures, string literals,
-and a short body window. Everything it discards is listed in that module's
-docstring. That figure comes from a single hand measurement, not a CI
-assertion, so treat it as an order of magnitude rather than a precise number.
+`understand/extract.py` reduces measured text by **93.6%** on F-Droid 2.0.1:
+990 decompiled files totalling 10.9 MB become 705 KB of summaries. It keeps the
+class declaration, field names, method signatures, string literals, and a short
+body window; everything it discards is listed in that module's docstring. The
+figure is reproducible with `extract_tree` against a decompiled tree but is not
+asserted in CI, because CI has no reason to decompile on every push.
 
 ### 84% of an APK is somebody else's code
 
@@ -214,6 +215,6 @@ two apps is a demonstration rather than a benchmark. The report says so.
 | No cross-reference analysis | Findings stay at "a string exists" rather than "this method calls this API" |
 | No runtime analysis | Dynamically loaded code, encrypted assets and runtime-decided endpoints are invisible |
 | No native code analysis | `.so` libraries are inventoried and otherwise treated as black boxes |
-| M2 measured on one unobfuscated app | The committed live run used F-Droid; obfuscated code may yield much less |
+| M2 measured on one unobfuscated app | The committed live run used F-Droid. A synthetic one-letter tree is tested, but no shipped obfuscated APK has been through it |
 | Groq backend never run live | Routing and cache keys are tested against a stub, not against Groq |
 | Evaluation suite is small | Scores are a regression signal, not a benchmark |

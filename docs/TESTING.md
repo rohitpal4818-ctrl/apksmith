@@ -49,7 +49,7 @@ never go wrong again. They have names like
 |---|---|
 | `test_apksmith.py` | M1 findings, risk curve, renderers, own-code prefix resolution |
 | `test_understand.py` | Extraction, class ranking, chunking, spec merging |
-| `test_pipeline_e2e.py` | Full M2 run through a stub model; M2 output consumed by M3 |
+| `test_pipeline_e2e.py` | Full M2 run through a stub model, including a fully obfuscated tree; M2 output consumed by M3 |
 | `test_providers.py` | Provider routing, env isolation, cache separation, 429 messages |
 | `test_generate_eval.py` | M3 generation, M5 scoring, the MCP server's live tool registry, LF output |
 | `test_collisions.py` | Generated filename collisions, which used to overwrite files |
@@ -62,12 +62,18 @@ never go wrong again. They have names like
 
 - **A live model.** Requests cost money and are non-deterministic. The stub
   covers the parse path; the committed F-Droid run covers the live path once.
-- **Obfuscated apps.** Every bundled fixture is unobfuscated. This is a known
-  gap, not an oversight — see the roadmap in the README.
+- **Real obfuscated APKs.** `test_pipeline_e2e.py` builds a tree whose every
+  identifier is a single letter, which covers the failure mode that matters
+  (name-based ranking has nothing to match, so everything falls to `other`). No
+  shipped obfuscated app has been through the pipeline, so how much a real R8
+  build degrades the *output* is still unknown.
 - **Groq.** The routing is pinned; no request has been made.
 - **Decompilation itself.** `test_pipeline_e2e.py` uses pre-decompiled fixtures
   or `--dry-run`, because requiring a JRE would make the default suite
-  un-runnable. CI installs Java and decompiles a real APK instead.
+  un-runnable. CI installs Java and decompiles a real APK instead. A manual run
+  on Windows (jadx 1.5.6, Temurin 21) produced 11,949 files from F-Droid and a
+  93.7k-character prompt from 60 selected classes, so the path is known to work
+  outside CI as well.
 
 The MCP tests are the exception to "no live server": when the SDK is installed,
 `build_server()` is asked for its tool list rather than the source being
