@@ -39,7 +39,9 @@ class DataSpec(BaseModel):
     """Something the app stores or persists."""
 
     name: str
-    kind: str = Field(default="unknown", description="preferences | database | file | cache")
+    kind: str = Field(
+        default="unknown", description="preferences | database | file | cache"
+    )
     description: str = ""
 
 
@@ -118,8 +120,10 @@ class BehaviourSpec(BaseModel):
                     a("**Actions:** " + ", ".join(s.actions))
                 a("")
                 if s.evidence:
-                    a(f"<sub>inferred from: {', '.join(s.evidence[:4])} "
-                      f"(confidence: {s.confidence})</sub>")
+                    a(
+                        f"<sub>inferred from: {', '.join(s.evidence[:4])} "
+                        f"(confidence: {s.confidence})</sub>"
+                    )
                     a("")
 
         if self.features:
@@ -127,21 +131,30 @@ class BehaviourSpec(BaseModel):
             a("")
             for f in self.features:
                 mark = "" if f.implemented else " *(appears stubbed)*"
-                a(f"- **{f.name}**{mark}" + (f" — {f.description}" if f.description else ""))
+                a(
+                    f"- **{f.name}**{mark}"
+                    + (f" — {f.description}" if f.description else "")
+                )
             a("")
 
         if self.network_calls:
             a("## Network calls")
             a("")
             for n in self.network_calls:
-                a(f"- `{n.endpoint or 'unknown'}`" + (f" — {n.purpose}" if n.purpose else ""))
+                a(
+                    f"- `{n.endpoint or 'unknown'}`"
+                    + (f" — {n.purpose}" if n.purpose else "")
+                )
             a("")
 
         if self.data_stored:
             a("## Data stored")
             a("")
             for d in self.data_stored:
-                a(f"- **{d.name}** ({d.kind})" + (f" — {d.description}" if d.description else ""))
+                a(
+                    f"- **{d.name}** ({d.kind})"
+                    + (f" — {d.description}" if d.description else "")
+                )
             a("")
 
         if self.permissions_justified:
@@ -171,7 +184,9 @@ class BehaviourSpec(BaseModel):
 class PartialSpec(BaseModel):
     """What a single extraction pass over a batch of classes returns."""
 
-    purpose_hint: str = Field(default="", description="What this batch suggests the app does")
+    purpose_hint: str = Field(
+        default="", description="What this batch suggests the app does"
+    )
     screens: list[ScreenSpec] = Field(default_factory=list)
     features: list[FeatureSpec] = Field(default_factory=list)
     data_stored: list[DataSpec] = Field(default_factory=list)

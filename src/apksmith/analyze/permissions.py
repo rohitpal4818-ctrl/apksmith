@@ -234,7 +234,9 @@ def analyse_permissions(loaded) -> tuple[list[PermissionUse], list[Finding]]:
 
         # Evidence of real use: any of the spec's API markers present in the
         # DEX string pool.
-        marker_hit = next((m for m in spec.api_markers if any(m in s for s in printable)), None)
+        marker_hit = next(
+            (m for m in spec.api_markers if any(m in s for s in printable)), None
+        )
         if not spec.api_markers:
             referenced = None  # nothing to check for
         else:

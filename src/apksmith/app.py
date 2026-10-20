@@ -52,6 +52,7 @@ def analyse(
         a report that silently describes nothing is a failure mode that hides
         real bugs.
     """
+
     def say(msg: str) -> None:
         if progress:
             print(f"  [apksmith] {msg}")

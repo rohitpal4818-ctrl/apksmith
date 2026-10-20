@@ -33,6 +33,7 @@ from .models import RiskReport
 
 try:
     from mcp.server.fastmcp import FastMCP
+
     HAVE_MCP = True
 except ImportError:  # pragma: no cover
     FastMCP = None  # type: ignore[assignment]
@@ -66,7 +67,7 @@ def _require_mcp() -> None:
         raise ApkSmithError(
             "The MCP SDK is not installed. Install it with:\n"
             "    pip install mcp\n"
-            "or install the dev extras: pip install -e \".[dev,mcp]\""
+            'or install the dev extras: pip install -e ".[dev,mcp]"'
         )
 
 
@@ -198,9 +199,7 @@ def build_server():
         digest = _apk_digest(apk_path)
         cached = workspace.source_dir(digest)
         if cached is not None:
-            return json.dumps(
-                {"session_id": digest, "cached": True, "path": str(cached)}
-            )
+            return json.dumps({"session_id": digest, "cached": True, "path": str(cached)})
 
         out = workspace.allocate(digest)
         jadx.decompile(apk_path, out_dir=out)
@@ -350,9 +349,7 @@ def build_server():
                 "output_dir": str(Path(output_dir)),
                 "files_written": len(written),
                 "summary": result.summary(),
-                "files": [
-                    {"path": gf.path, "origin": gf.origin} for gf in result.files
-                ],
+                "files": [{"path": gf.path, "origin": gf.origin} for gf in result.files],
                 "open_questions": result.open_questions,
                 "warnings": result.warnings,
                 "note": (

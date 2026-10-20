@@ -37,7 +37,56 @@ from .understand.spec import BehaviourSpec
 #: comparing two descriptions, otherwise both texts score highly for sharing
 #: the word "app".
 _STOPWORDS = frozenset(
-    ["a", "an", "the", "and", "or", "of", "to", "in", "for", "with", "that", "this", "it", "its", "is", "are", "was", "were", "be", "been", "app", "application", "user", "users", "can", "will", "may", "when", "where", "which", "one", "all", "any", "each", "other", "more", "most", "some", "such", "than", "then", "there", "these", "those", "very", "own", "same", "so"]
+    [
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "of",
+        "to",
+        "in",
+        "for",
+        "with",
+        "that",
+        "this",
+        "it",
+        "its",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "app",
+        "application",
+        "user",
+        "users",
+        "can",
+        "will",
+        "may",
+        "when",
+        "where",
+        "which",
+        "one",
+        "all",
+        "any",
+        "each",
+        "other",
+        "more",
+        "most",
+        "some",
+        "such",
+        "than",
+        "then",
+        "there",
+        "these",
+        "those",
+        "very",
+        "own",
+        "same",
+        "so",
+    ]
 )
 
 _WORD = re.compile(r"[a-z0-9]+")
@@ -71,7 +120,9 @@ class MetricResult:
         return round(self.value * 100, 1)
 
 
-def _prf(reference: Iterable[str], predicted: Iterable[str], normaliser) -> dict[str, float]:
+def _prf(
+    reference: Iterable[str], predicted: Iterable[str], normaliser
+) -> dict[str, float]:
     """Precision, recall and F1 over a fuzzy label match.
 
     Two labels match when their normalised token sets intersect, which handles
@@ -135,7 +186,9 @@ class CaseResult:
         }
 
 
-def evaluate(spec: BehaviourSpec, reference: dict, app_name: str | None = None) -> CaseResult:
+def evaluate(
+    spec: BehaviourSpec, reference: dict, app_name: str | None = None
+) -> CaseResult:
     """Score one generated spec against a hand-written reference.
 
     Parameters
@@ -191,11 +244,13 @@ def evaluate(spec: BehaviourSpec, reference: dict, app_name: str | None = None) 
             ),
         ]
         if got["missed"]:
-            result.notes.append("Screens in reference but not found: "
-                                + ", ".join(got["missed"]))
+            result.notes.append(
+                "Screens in reference but not found: " + ", ".join(got["missed"])
+            )
         if got["spurious"]:
-            result.notes.append("Screens reported but not in reference: "
-                                + ", ".join(got["spurious"]))
+            result.notes.append(
+                "Screens reported but not in reference: " + ", ".join(got["spurious"])
+            )
 
     # -- features ------------------------------------------------------- #
     ref_features = labels(reference.get("features"))

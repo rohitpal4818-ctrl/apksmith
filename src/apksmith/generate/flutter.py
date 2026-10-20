@@ -72,28 +72,42 @@ def build_flutter_project(spec: BehaviourSpec) -> GenerationResult:
     result = GenerationResult()
     stems = _NameRegistry(reserved=_BUILTIN_STEMS)
     app_class = f"{pascal(spec.app_name or spec.package or 'app')}App"
-    project_name = snake(spec.app_name or spec.package or "reconstructed_app").replace(".", "_")
+    project_name = snake(spec.app_name or spec.package or "reconstructed_app").replace(
+        ".", "_"
+    )
     title = spec.app_name or pascal(spec.package or "Reconstructed App")
     description = _one_line(spec.purpose) or "Reconstructed from static analysis"
 
     def add(path: str, content: str, origin: str = "scaffold", note: str = "") -> None:
-        result.files.append(GeneratedFile(path=path, content=content, origin=origin, note=note))
+        result.files.append(
+            GeneratedFile(path=path, content=content, origin=origin, note=note)
+        )
 
     # ---- project scaffolding --------------------------------------------- #
-    add("pubspec.yaml", templates.render(templates.PUBSPEC,
-                                         project_name=project_name,
-                                         description=description))
+    add(
+        "pubspec.yaml",
+        templates.render(
+            templates.PUBSPEC, project_name=project_name, description=description
+        ),
+    )
     add(".gitignore", templates.render(templates.GITIGNORE))
     add("analysis_options.yaml", templates.render(templates.ANALYSIS_OPTIONS))
     add("lib/main.dart", templates.render(templates.MAIN_DART, app_class=app_class))
-    add("lib/app.dart", templates.render(templates.APP_DART,
-                                          app_class=app_class,
-                                          title=dart_string(title)))
+    add(
+        "lib/app.dart",
+        templates.render(
+            templates.APP_DART, app_class=app_class, title=dart_string(title)
+        ),
+    )
     add("lib/theme.dart", templates.render(templates.THEME_DART))
-    add("lib/screens/unknown_route_screen.dart",
-        templates.render(templates.UNKNOWN_ROUTE_DART))
-    add("test/widget_test.dart",
-        templates.render(templates.TEST_DART, project_name=project_name))
+    add(
+        "lib/screens/unknown_route_screen.dart",
+        templates.render(templates.UNKNOWN_ROUTE_DART),
+    )
+    add(
+        "test/widget_test.dart",
+        templates.render(templates.TEST_DART, project_name=project_name),
+    )
 
     # ---- screens ---------------------------------------------------------- #
     screen_routes: list[tuple[str, str]] = []
@@ -137,8 +151,12 @@ def build_flutter_project(spec: BehaviourSpec) -> GenerationResult:
 
     # ---- api client ------------------------------------------------------- #
     if spec.network_calls:
-        add("lib/data/api_client.dart", _api_client_dart(spec), origin="scaffold",
-            note="endpoints recovered from the DEX string pool; unverified")
+        add(
+            "lib/data/api_client.dart",
+            _api_client_dart(spec),
+            origin="scaffold",
+            note="endpoints recovered from the DEX string pool; unverified",
+        )
 
     # ---- docs ------------------------------------------------------------- #
     add("README.md", _readme(spec, title))
@@ -223,7 +241,9 @@ def _screen_dart(screen, class_name: str, project_name: str, stem: str) -> str:
     items = []
     for show in screen.shows[:10]:
         items.append(f"        Text('• {show}'),")
-    observed_items = "\n".join(items) + "\n" if items else "        const SizedBox.shrink(),\n"
+    observed_items = (
+        "\n".join(items) + "\n" if items else "        const SizedBox.shrink(),\n"
+    )
 
     stub_detail = (
         f"Static analysis observed {len(screen.shows)} element(s) and "
@@ -304,16 +324,24 @@ def _readme(spec: BehaviourSpec, title: str) -> str:
     if not spec.screens:
         screens += "| _none identified_ | | | |\n"
 
-    features = "\n".join(
-        f"- **{f.name}**" + ("" if f.implemented else " _(appears stubbed)_")
-        + (f" — {f.description}" if f.description else "")
-        for f in spec.features
-    ) or "_none identified_"
+    features = (
+        "\n".join(
+            f"- **{f.name}**"
+            + ("" if f.implemented else " _(appears stubbed)_")
+            + (f" — {f.description}" if f.description else "")
+            for f in spec.features
+        )
+        or "_none identified_"
+    )
 
-    data = "\n".join(
-        f"- **{d.name}** ({d.kind})" + (f" — {d.description}" if d.description else "")
-        for d in spec.data_stored
-    ) or "_none identified_"
+    data = (
+        "\n".join(
+            f"- **{d.name}** ({d.kind})"
+            + (f" — {d.description}" if d.description else "")
+            for d in spec.data_stored
+        )
+        or "_none identified_"
+    )
 
     network = "| Purpose | Endpoint | Method | Evidence |\n| --- | --- | --- | --- |\n"
     for n in spec.network_calls:
@@ -324,7 +352,9 @@ def _readme(spec: BehaviourSpec, title: str) -> str:
     if not spec.network_calls:
         network += "| _none identified_ | | | |\n"
 
-    permissions = "\n".join(f"- `{p}` — {why}" for p, why in spec.permissions_justified.items())
+    permissions = "\n".join(
+        f"- `{p}` — {why}" for p, why in spec.permissions_justified.items()
+    )
     if not permissions:
         risky = "\n".join(f"- `{p}`" for p in spec.permissions_justified)
         permissions = risky or "_none justified_"
@@ -375,7 +405,8 @@ def _spec_doc(spec: BehaviourSpec) -> str:
 
     lines += ["## Features", ""]
     lines.extend(
-        f"- **{f.name}**" + ("" if f.implemented else " (appears stubbed)")
+        f"- **{f.name}**"
+        + ("" if f.implemented else " (appears stubbed)")
         + (f" — {f.description}" if f.description else "")
         for f in spec.features
     ) or ["_none_"]
@@ -407,14 +438,11 @@ def _open_questions(spec: BehaviourSpec) -> list[str]:
         )
     low = [s.name for s in spec.screens if s.confidence == "low"]
     if low:
-        questions.append(
-            "Verify these low-confidence screens by hand: " + ", ".join(low)
-        )
+        questions.append("Verify these low-confidence screens by hand: " + ", ".join(low))
     stubbed = [f.name for f in spec.features if not f.implemented]
     if stubbed:
         questions.append(
-            "These features appear stubbed or dead in the original: "
-            + ", ".join(stubbed)
+            "These features appear stubbed or dead in the original: " + ", ".join(stubbed)
         )
     if not spec.network_calls:
         questions.append(
@@ -442,5 +470,3 @@ def _warnings(spec: BehaviourSpec) -> list[str]:
             "as a starting point, not a specification."
         )
     return warnings
-
-

@@ -1,11 +1,11 @@
 """M2: the understanding stage.
 
-    extract    decompiled Java -> clean, LLM-readable ClassSummary objects
-    rank       choose which classes actually describe the app
-    llm        OpenRouter client with caching and rate-limit reporting
-    prompt     prompt construction and the JSON contract
-    spec       the BehaviourSpec output model
-    pipeline   chunk, extract, merge, synthesise
+extract    decompiled Java -> clean, LLM-readable ClassSummary objects
+rank       choose which classes actually describe the app
+llm        OpenRouter client with caching and rate-limit reporting
+prompt     prompt construction and the JSON contract
+spec       the BehaviourSpec output model
+pipeline   chunk, extract, merge, synthesise
 """
 
 from __future__ import annotations

@@ -54,8 +54,10 @@ def to_markdown(report: RiskReport, max_findings: int = 40) -> str:
 
     a(f"# APKSmith report: {i.app_name or i.package}")
     a("")
-    a(f"**Package** `{i.package}` &nbsp;|&nbsp; **Version** {i.version_name or '?'} "
-      f"({i.version_code}) &nbsp;|&nbsp; **Risk score** {report.risk_score}/100")
+    a(
+        f"**Package** `{i.package}` &nbsp;|&nbsp; **Version** {i.version_name or '?'} "
+        f"({i.version_code}) &nbsp;|&nbsp; **Risk score** {report.risk_score}/100"
+    )
     a("")
     a(f"- SDK: min {i.min_sdk}, target {i.target_sdk}")
     a(f"- Main activity: `{i.main_activity}`")
@@ -86,10 +88,13 @@ def to_markdown(report: RiskReport, max_findings: int = 40) -> str:
     sev_counts: dict[str, int] = {}
     for f in report.findings:
         sev_counts[f.severity.value] = sev_counts.get(f.severity.value, 0) + 1
-    a("**Findings by severity:** " + " &nbsp;|&nbsp; ".join(
-        f"{_SEVERITY_LABEL[k]} {v}" for k, v in
-        sorted(sev_counts.items(), key=lambda kv: -Severity(kv[0]).weight)
-    ))
+    a(
+        "**Findings by severity:** "
+        + " &nbsp;|&nbsp; ".join(
+            f"{_SEVERITY_LABEL[k]} {v}"
+            for k, v in sorted(sev_counts.items(), key=lambda kv: -Severity(kv[0]).weight)
+        )
+    )
     a("")
 
     a("## Findings")
@@ -104,7 +109,9 @@ def to_markdown(report: RiskReport, max_findings: int = 40) -> str:
             a(f"| **{_SEVERITY_LABEL[f.severity]}** | {title} | {f.confidence.value} |")
         if len(report.findings) > max_findings:
             a("")
-            a(f"_{len(report.findings) - max_findings} further findings in the JSON output._")
+            a(
+                f"_{len(report.findings) - max_findings} further findings in the JSON output._"
+            )
     a("")
 
     if report.permissions:
@@ -113,8 +120,14 @@ def to_markdown(report: RiskReport, max_findings: int = 40) -> str:
         a("| Permission | Severity | Used in code | Why it matters |")
         a("| --- | --- | --- | --- |")
         for p in report.permissions[:30]:
-            used = "yes" if p.referenced_in_code else ("no" if p.referenced_in_code is False else "n/a")
-            a(f"| `{p.name.split('.')[-1]}` | {_SEVERITY_LABEL[p.severity]} | {used} | {p.reason} |")
+            used = (
+                "yes"
+                if p.referenced_in_code
+                else ("no" if p.referenced_in_code is False else "n/a")
+            )
+            a(
+                f"| `{p.name.split('.')[-1]}` | {_SEVERITY_LABEL[p.severity]} | {used} | {p.reason} |"
+            )
         a("")
 
     if report.components:
@@ -163,11 +176,15 @@ def to_terminal(report: RiskReport, top_n: int = 12) -> str:
     a(f" {_fmt_bytes(report.apk_size_bytes)}   sha256 {report.apk_sha256[:16]}...")
     a(rule)
     a(f" RISK SCORE          {report.risk_score}/100")
-    a(f" classes / methods   {m.get('total_classes', 0):,} / {m.get('total_methods', 0):,}")
+    a(
+        f" classes / methods   {m.get('total_classes', 0):,} / {m.get('total_methods', 0):,}"
+    )
     a(f" own code share      {1 - m.get('third_party_ratio', 0):.0%}")
     a(f" endpoints           {len(report.endpoints)}")
-    a(f" components          {len(report.components)} "
-      f"({m.get('exported_components', 0)} exported)")
+    a(
+        f" components          {len(report.components)} "
+        f"({m.get('exported_components', 0)} exported)"
+    )
     a(f" native libs         {len(report.native_libs)}")
     a(f" obfuscation         {m.get('short_name_ratio', 0):.0%} short class names")
     a(f" SDKs identified     {len(report.sdks)}")
@@ -177,10 +194,15 @@ def to_terminal(report: RiskReport, top_n: int = 12) -> str:
     for f in report.findings:
         sev_counts[f.severity.value] = sev_counts.get(f.severity.value, 0) + 1
     if sev_counts:
-        a(" FINDINGS: " + "  ".join(
-            f"{_SEVERITY_LABEL[Severity(k)].title()}={v}"
-            for k, v in sorted(sev_counts.items(), key=lambda kv: -Severity(kv[0]).weight)
-        ))
+        a(
+            " FINDINGS: "
+            + "  ".join(
+                f"{_SEVERITY_LABEL[Severity(k)].title()}={v}"
+                for k, v in sorted(
+                    sev_counts.items(), key=lambda kv: -Severity(kv[0]).weight
+                )
+            )
+        )
     else:
         a(" FINDINGS: none")
     a(rule)

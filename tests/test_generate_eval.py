@@ -32,12 +32,21 @@ SPEC = BehaviourSpec.model_validate(
         "package": "com.example.ledgerly",
         "purpose": "A simple expense tracker.",
         "screens": [
-            {"name": "Expense List", "purpose": "See expenses",
-             "shows": ["rows", "total"], "actions": ["add"],
-             "evidence": ["ExpenseListActivity"], "confidence": "high"},
-            {"name": "Add Expense", "purpose": "Record one",
-             "shows": ["amount field"], "evidence": ["AddExpenseActivity"],
-             "confidence": "low"},
+            {
+                "name": "Expense List",
+                "purpose": "See expenses",
+                "shows": ["rows", "total"],
+                "actions": ["add"],
+                "evidence": ["ExpenseListActivity"],
+                "confidence": "high",
+            },
+            {
+                "name": "Add Expense",
+                "purpose": "Record one",
+                "shows": ["amount field"],
+                "evidence": ["AddExpenseActivity"],
+                "confidence": "low",
+            },
         ],
         "features": [
             {"name": "Monthly total", "description": "", "implemented": True},
@@ -45,8 +54,12 @@ SPEC = BehaviourSpec.model_validate(
         ],
         "data_stored": [{"name": "expenses", "kind": "database", "description": ""}],
         "network_calls": [
-            {"purpose": "backup", "endpoint": "https://api.test/v1", "method": "POST",
-             "evidence": ["BackupService"]}
+            {
+                "purpose": "backup",
+                "endpoint": "https://api.test/v1",
+                "method": "POST",
+                "evidence": ["BackupService"],
+            }
         ],
         "permissions_justified": {"android.permission.INTERNET": "backups"},
     }
@@ -215,7 +228,8 @@ def test_refuses_empty_spec():
 
 def test_evidence_is_preserved_in_screen_source(generated: GenerationResult):
     screen = next(
-        f.content for f in generated.files
+        f.content
+        for f in generated.files
         if f.path == "lib/screens/expense_list_screen.dart"
     )
     assert "ExpenseListActivity" in screen, "provenance lost"

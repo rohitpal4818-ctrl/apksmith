@@ -38,8 +38,12 @@ def run(
     report_json: Path | None = typer.Option(
         None, "--report", help="Reuse a saved M1 JSON report instead of re-running M1"
     ),
-    out: Path = typer.Option(Path("reports/understanding.md"), "--out", help="Markdown output"),
-    json_out: Path | None = typer.Option(None, "--json", help="Also write the spec as JSON"),
+    out: Path = typer.Option(
+        Path("reports/understanding.md"), "--out", help="Markdown output"
+    ),
+    json_out: Path | None = typer.Option(
+        None, "--json", help="Also write the spec as JSON"
+    ),
     decompiled: Path | None = typer.Option(
         None, "--decompiled", help="Reuse an existing jadx output directory"
     ),
@@ -135,14 +139,18 @@ def run(
 
         if dry_run:
             summaries = extract_tree(source_root, package_prefixes=prefixes)
-            selected = select(summaries, max_classes=max_classes, per_role_cap=per_role_cap)
+            selected = select(
+                summaries, max_classes=max_classes, per_role_cap=per_role_cap
+            )
             typer.echo(f"\nprovider           : {provider}")
             typer.echo(f"model              : {model or DEFAULT_MODEL[provider]}")
             typer.echo(f"classes in package : {len(summaries):,}")
             typer.echo(f"roles              : {role_census(summaries)}")
             typer.echo(f"selected           : {len(selected)}")
-            typer.echo(f"prompt size        : "
-                       f"{sum(len(s.to_prompt_block()) for s in selected):,} chars")
+            typer.echo(
+                f"prompt size        : "
+                f"{sum(len(s.to_prompt_block()) for s in selected):,} chars"
+            )
             typer.echo("\n--- SYSTEM PROMPT ---")
             typer.echo(SYSTEM)
             typer.echo("\n--- FIRST USER MESSAGE ---")

@@ -158,9 +158,7 @@ PARTIAL = {
             "confidence": "high",
         }
     ],
-    "features": [
-        {"name": "Delete an expense", "description": "", "implemented": True}
-    ],
+    "features": [{"name": "Delete an expense", "description": "", "implemented": True}],
     "data_stored": [{"name": "expenses", "kind": "database", "description": ""}],
     "network_calls": [
         {
@@ -180,14 +178,25 @@ FINAL = {
     "purpose": "An expense tracker for people who want a simple running total.",
     "target_users": "People who want a plain expense log.",
     "screens": [
-        {"name": "Expense List", "purpose": "See and delete expenses",
-         "shows": ["rows", "total"], "actions": ["delete"], "evidence": ["ExpenseListScreen"],
-         "confidence": "high"}
+        {
+            "name": "Expense List",
+            "purpose": "See and delete expenses",
+            "shows": ["rows", "total"],
+            "actions": ["delete"],
+            "evidence": ["ExpenseListScreen"],
+            "confidence": "high",
+        }
     ],
     "features": [{"name": "Delete an expense", "description": "", "implemented": True}],
     "data_stored": [{"name": "expenses", "kind": "database", "description": ""}],
-    "network_calls": [{"purpose": "fetch", "endpoint": "https://api.example.test/v1/expenses",
-                       "method": "GET", "evidence": ["ExpenseRepository"]}],
+    "network_calls": [
+        {
+            "purpose": "fetch",
+            "endpoint": "https://api.example.test/v1/expenses",
+            "method": "GET",
+            "evidence": ["ExpenseRepository"],
+        }
+    ],
     "permissions_justified": {"android.permission.INTERNET": "fetches expenses"},
     "platform_dependencies": [],
     "caveats": ["static analysis only"],
@@ -279,8 +288,11 @@ def test_third_party_code_never_reaches_the_prompt(decompiled_tree: Path):
     """OkHttp's source must not be billed to the model."""
     client = StubClient()
     understand(
-        _report(), decompiled_tree, client,  # type: ignore[arg-type]
-        max_classes=12, per_chunk=3,
+        _report(),
+        decompiled_tree,
+        client,  # type: ignore[arg-type]
+        max_classes=12,
+        per_chunk=3,
     )
     for prompt in client.prompts:
         assert "OkHttpClient" not in prompt
@@ -290,8 +302,11 @@ def test_third_party_code_never_reaches_the_prompt(decompiled_tree: Path):
 def test_synthetic_classes_never_reach_the_prompt(decompiled_tree: Path):
     client = StubClient()
     understand(
-        _report(), decompiled_tree, client,  # type: ignore[arg-type]
-        max_classes=12, per_chunk=3,
+        _report(),
+        decompiled_tree,
+        client,  # type: ignore[arg-type]
+        max_classes=12,
+        per_chunk=3,
     )
     for prompt in client.prompts:
         assert "ExternalSyntheticLambda" not in prompt
@@ -301,8 +316,11 @@ def test_static_facts_are_in_the_prompt(decompiled_tree: Path):
     """Endpoints found by M1 are ground truth and must be offered to the model."""
     client = StubClient()
     understand(
-        _report(), decompiled_tree, client,  # type: ignore[arg-type]
-        max_classes=12, per_chunk=3,
+        _report(),
+        decompiled_tree,
+        client,  # type: ignore[arg-type]
+        max_classes=12,
+        per_chunk=3,
     )
     assert "api.example.test" in client.prompts[0]
 
@@ -310,8 +328,11 @@ def test_static_facts_are_in_the_prompt(decompiled_tree: Path):
 def test_synthesis_asks_for_a_merge_not_another_extraction(decompiled_tree: Path):
     client = StubClient()
     understand(
-        _report(), decompiled_tree, client,  # type: ignore[arg-type]
-        max_classes=12, per_chunk=3,
+        _report(),
+        decompiled_tree,
+        client,  # type: ignore[arg-type]
+        max_classes=12,
+        per_chunk=3,
     )
     assert len(client.systems) >= 2
     assert "merging" in client.systems[-1].lower()
@@ -331,8 +352,11 @@ def test_generated_project_from_pipeline_spec(decompiled_tree: Path, tmp_path: P
     from apksmith.generate import build_flutter_project
 
     result = understand(
-        _report(), decompiled_tree, StubClient(),  # type: ignore[arg-type]
-        max_classes=12, per_chunk=3,
+        _report(),
+        decompiled_tree,
+        StubClient(),  # type: ignore[arg-type]
+        max_classes=12,
+        per_chunk=3,
     )
     generated = build_flutter_project(result.spec)
     written = generated.write(tmp_path, overwrite=True)

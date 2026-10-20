@@ -57,7 +57,7 @@ def test_extraction_strips_metadata_blob(tmp_path: Path):
 
     s = summarise_class(f)
     assert s is not None
-    assert s.name == "LoginActivity"           # not the whole declaration line
+    assert s.name == "LoginActivity"  # not the whole declaration line
     assert s.superclass == "Hilt_LoginActivity"
     assert "repo" in s.fields
     assert "onCreate" in " ".join(s.methods)
@@ -90,7 +90,7 @@ def test_extraction_survives_undecodable_bytes(tmp_path: Path):
     f = tmp_path / "Weird.java"
     f.write_bytes(
         b"package a;\n"
-        b"public class Weird { private String label = \"\xff\xfe\";\n"
+        b'public class Weird { private String label = "\xff\xfe";\n'
         b"    public void refresh(String url) { label = url; } }\n"
     )
     s = summarise_class(f)
@@ -241,7 +241,9 @@ def test_merge_keeps_distinct_screens():
 # --------------------------------------------------------------------------- #
 # Package resolution -- the bug that silently reduces everything to nothing
 # --------------------------------------------------------------------------- #
-def _report(pkg: str, main: str | None, components: list[str] | None = None) -> RiskReport:
+def _report(
+    pkg: str, main: str | None, components: list[str] | None = None
+) -> RiskReport:
     return RiskReport(
         identity=AppIdentity(package=pkg, main_activity=main),
         components=[Component(kind="activity", name=n) for n in (components or [])],
@@ -294,8 +296,12 @@ def test_static_facts_include_ground_truth():
     report = RiskReport(
         identity=AppIdentity(package="com.acme.app", app_name="Acme"),
         endpoints=[
-            {"value": "https://api.acme.test/v1", "scheme": "https",
-             "source": "code", "confidence": "high"}
+            {
+                "value": "https://api.acme.test/v1",
+                "scheme": "https",
+                "source": "code",
+                "confidence": "high",
+            }
         ],
         sdks=[{"name": "OkHttp", "category": "networking"}],
         components=[Component(kind="activity", name="com.acme.app.Home")],

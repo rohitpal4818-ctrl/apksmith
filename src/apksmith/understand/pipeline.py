@@ -85,9 +85,20 @@ def resolve_app_prefixes(
     # service, ProfileInstaller registers a receiver -- so these appear in the
     # component list and would otherwise be mistaken for app code.
     library_namespaces = (
-        "androidx.", "android.", "com.google.", "com.android.", "kotlin.",
-        "kotlinx.", "com.squareup.", "dagger.", "javax.", "java.", "sun.",
-        "org.jetbrains.", "org.json.", "org.apache.",
+        "androidx.",
+        "android.",
+        "com.google.",
+        "com.android.",
+        "kotlin.",
+        "kotlinx.",
+        "com.squareup.",
+        "dagger.",
+        "javax.",
+        "java.",
+        "sun.",
+        "org.jetbrains.",
+        "org.json.",
+        "org.apache.",
     )
 
     def owned(package: str) -> bool:
@@ -140,9 +151,7 @@ def resolve_app_prefixes(
     return candidates[:1]
 
 
-def _chunk(
-    summaries: list[ClassSummary], per_chunk: int
-) -> list[list[ClassSummary]]:
+def _chunk(summaries: list[ClassSummary], per_chunk: int) -> list[list[ClassSummary]]:
     """Split selected classes into chunks, interleaving roles.
 
     Selected classes arrive sorted by score, so a naive split would put every
@@ -305,7 +314,9 @@ def understand(
     try:
         spec = BehaviourSpec.model_validate(payload)
     except ValidationError as exc:
-        say(f"final spec failed validation ({exc.error_count()} issues); using merged partials")
+        say(
+            f"final spec failed validation ({exc.error_count()} issues); using merged partials"
+        )
         spec = _fallback_spec(report, partials)
 
     return UnderstandResult(

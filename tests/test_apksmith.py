@@ -90,12 +90,12 @@ def test_risk_score_matches_documented_curve():
 @pytest.mark.parametrize(
     "value,expected",
     [
-        ("0" * 56, False),                       # sentinel padding
-        ("f" * 64, False),                       # sentinel
+        ("0" * 56, False),  # sentinel padding
+        ("f" * 64, False),  # sentinel
         ("00000000000000000000000000000000ab", False),  # mostly zeros + tail
-        ("4a7f2b9e1c8d0a3f6b5e2d7c9a1f4e8b", True),    # real-looking key
+        ("4a7f2b9e1c8d0a3f6b5e2d7c9a1f4e8b", True),  # real-looking key
         ("too-short", False),
-        ("ZZZZ0000000000000000000000000000", False),   # not hex
+        ("ZZZZ0000000000000000000000000000", False),  # not hex
     ],
 )
 def test_key_heuristic_rejects_placeholders(value, expected):
@@ -229,9 +229,7 @@ def test_every_finding_has_evidence_or_is_informational():
     report = analyse(SAMPLE_APK)
     for f in report.findings:
         if f.severity.weight >= 30 and f.confidence == Confidence.HIGH:
-            assert f.evidence or f.location, (
-                f"unsupported high-severity claim: {f.title}"
-            )
+            assert f.evidence or f.location, f"unsupported high-severity claim: {f.title}"
 
 
 @needs_apk
@@ -242,4 +240,3 @@ def test_manifest_and_deeplink_parsing():
     links = parse_manifest_deeplinks(loaded)
     assert links, "expected at least one manifest deep link"
     assert all(link.scheme for link in links)
-

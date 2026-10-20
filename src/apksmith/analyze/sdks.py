@@ -18,13 +18,38 @@ from ..models import ThirdPartySDK
 #: (class/package prefix, display name, category, human note)
 _SDK_SIGNATURES: list[tuple[str, str, str, str]] = [
     # Analytics / attribution
-    ("Lcom/google/firebase/analytics", "Firebase Analytics", "analytics", "Google event tracking"),
-    ("Lcom/google/firebase/messaging", "Firebase Cloud Messaging", "messaging", "Push notifications"),
-    ("Lcom/google/firebase/crashlytics", "Firebase Crashlytics", "crash-reporting", "Crash and error reporting"),
+    (
+        "Lcom/google/firebase/analytics",
+        "Firebase Analytics",
+        "analytics",
+        "Google event tracking",
+    ),
+    (
+        "Lcom/google/firebase/messaging",
+        "Firebase Cloud Messaging",
+        "messaging",
+        "Push notifications",
+    ),
+    (
+        "Lcom/google/firebase/crashlytics",
+        "Firebase Crashlytics",
+        "crash-reporting",
+        "Crash and error reporting",
+    ),
     ("Lcom/google/firebase/auth", "Firebase Auth", "auth", "Google-backed sign-in"),
-    ("Lcom/google/firebase/firestore", "Cloud Firestore", "database", "Google NoSQL database"),
+    (
+        "Lcom/google/firebase/firestore",
+        "Cloud Firestore",
+        "database",
+        "Google NoSQL database",
+    ),
     ("Lcom/google/android/gms/ads", "Google AdMob", "ads", "Advertising"),
-    ("Lcom/google/android/gms/ads/identifier", "Google Advertising ID", "ads", "Device advertising identifier"),
+    (
+        "Lcom/google/android/gms/ads/identifier",
+        "Google Advertising ID",
+        "ads",
+        "Device advertising identifier",
+    ),
     ("Lcom/facebook/ads", "Meta Audience Network", "ads", "Meta advertising"),
     ("Lcom/facebook/", "Facebook SDK", "social", "Facebook integration"),
     ("Lcom/amplitude/", "Amplitude", "analytics", "Product analytics"),
@@ -50,7 +75,12 @@ _SDK_SIGNATURES: list[tuple[str, str, str, str]] = [
     # Storage / ORM
     ("Landroidx/room/", "Room", "database", "Android ORM"),
     ("Lio/realm/", "Realm", "database", "Local database"),
-    ("Lcom/google/protobuf/", "Protocol Buffers", "serialization", "Binary serialization"),
+    (
+        "Lcom/google/protobuf/",
+        "Protocol Buffers",
+        "serialization",
+        "Binary serialization",
+    ),
     # UI kits
     ("Lcom/facebook/react/", "React Native", "ui", "Cross-platform UI"),
     ("Lio/flutter/", "Flutter", "ui", "Cross-platform UI"),

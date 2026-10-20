@@ -1,4 +1,4 @@
-﻿"""CLI argument validation for `apksmith understand run`.
+"""CLI argument validation for `apksmith understand run`.
 
 Both cases here used to fail badly rather than early:
 

@@ -49,7 +49,10 @@ def test_names_colliding_after_normalisation_do_not_collide():
 
 def test_duplicate_data_names_do_not_collide():
     spec = _spec(
-        data_stored=[{"name": "expenses", "kind": "db"}, {"name": "Expenses", "kind": "db"}]
+        data_stored=[
+            {"name": "expenses", "kind": "db"},
+            {"name": "Expenses", "kind": "db"},
+        ]
     )
     paths = _paths(spec)
     assert len(paths) == len(set(paths))
@@ -112,7 +115,9 @@ def test_routes_stay_in_step_with_files_after_a_collision(tmp_path: Path):
 def test_route_names_are_unique_dart_constants():
     spec = _spec(screens=[{"name": "App List"}, {"name": "app_list"}])
     router = next(
-        f.content for f in build_flutter_project(spec).files if f.path == "lib/router.dart"
+        f.content
+        for f in build_flutter_project(spec).files
+        if f.path == "lib/router.dart"
     )
     consts = [
         line.split("static const ")[1].split(" =")[0]

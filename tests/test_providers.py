@@ -120,7 +120,9 @@ def test_request_goes_to_the_provider_endpoint(provider, calls, tmp_path):
 
 @pytest.mark.parametrize("provider", ["openrouter", "groq"])
 def test_bearer_token_is_sent(provider, calls, tmp_path):
-    LlmClient(api_key="secret", provider=provider, cache_dir=tmp_path).complete("sys", "user")
+    LlmClient(api_key="secret", provider=provider, cache_dir=tmp_path).complete(
+        "sys", "user"
+    )
     assert calls[0]["headers"]["Authorization"] == "Bearer secret"
 
 

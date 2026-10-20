@@ -55,7 +55,9 @@ def scan(
     apk: Path = typer.Argument(..., exists=True, help="Path to the .apk file"),
     json_out: Path = typer.Option(None, "--json", help="Write the full report as JSON"),
     md_out: Path = typer.Option(None, "--markdown", help="Write the report as Markdown"),
-    top: int = typer.Option(12, "--top", help="How many findings to show in the terminal"),
+    top: int = typer.Option(
+        12, "--top", help="How many findings to show in the terminal"
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show pipeline progress"),
 ) -> None:
     """Analyse an APK and print a report."""

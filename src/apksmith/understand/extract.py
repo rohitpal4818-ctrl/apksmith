@@ -86,8 +86,22 @@ _FIELD = re.compile(
 )
 
 _CONTROL_KEYWORDS = {
-    "if", "for", "while", "switch", "catch", "return", "new", "super",
-    "this", "else", "do", "try", "throw", "assert", "synchronized", "case",
+    "if",
+    "for",
+    "while",
+    "switch",
+    "catch",
+    "return",
+    "new",
+    "super",
+    "this",
+    "else",
+    "do",
+    "try",
+    "throw",
+    "assert",
+    "synchronized",
+    "case",
 }
 
 
@@ -158,7 +172,7 @@ def _strip_noise(source: str) -> str:
 def _clean_type(name: str) -> str:
     """Reduce a fully-qualified type to something readable."""
     name = name.strip()
-    name = re.sub(r"<.*>", "", name)          # drop generics
+    name = re.sub(r"<.*>", "", name)  # drop generics
     name = name.replace("[]", "")
     name = name.rsplit(".", 1)[-1]
     if _BOILERPLATE_TYPES.fullmatch(name):
@@ -196,7 +210,9 @@ def _class_header(lines: list[str]) -> dict:
         if am and not s.endswith(";") and am.group(1) != "Metadata":
             info["annotations"].append(am.group(1))
 
-        if re.match(r"^(public\s+|final\s+|abstract\s+)*(class|interface|enum|record)\s", s):
+        if re.match(
+            r"^(public\s+|final\s+|abstract\s+)*(class|interface|enum|record)\s", s
+        ):
             # Pull just the identifier after the keyword. Assigning the whole
             # line as the name produced nonsense like
             # "public final class MainActivity extends Hilt_MainActivity".
@@ -250,7 +266,7 @@ def _extract_methods(lines: list[str]) -> list[str]:
                 if not part:
                     continue
                 if _BOILERPLATE_TYPES.search(part):
-                    params = []          # compiler plumbing, skip the whole sig
+                    params = []  # compiler plumbing, skip the whole sig
                     break
                 cleaned = _clean_type(part.split()[-1] if " " in part else part)
                 if cleaned:

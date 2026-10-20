@@ -105,9 +105,7 @@ def _content_score(summary: ClassSummary) -> float:
     score += min(screen_methods, 6) * 2.0
     score += min(data_methods, 6) * 1.5
 
-    meaningful = sum(
-        1 for s in summary.strings if _MEANINGFUL_STRING.match(s)
-    )
+    meaningful = sum(1 for s in summary.strings if _MEANINGFUL_STRING.match(s))
     score += min(meaningful, 8) * 1.0
 
     # A body means we can say what happens, not just what exists.

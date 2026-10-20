@@ -19,7 +19,8 @@ generate_cli = typer.Typer(
     name="generate", help="M3: behaviour spec -> runnable project.", no_args_is_help=True
 )
 evaluate_cli = typer.Typer(
-    name="evaluate", help="M5: score specs against hand-written references.",
+    name="evaluate",
+    help="M5: score specs against hand-written references.",
     no_args_is_help=True,
 )
 
@@ -27,7 +28,9 @@ evaluate_cli = typer.Typer(
 @generate_cli.command("run")
 def generate_run(
     spec: Path = typer.Argument(..., exists=True, help="Behaviour spec JSON from M2"),
-    out: Path = typer.Option(Path("build/reconstruction"), "--out", help="Output directory"),
+    out: Path = typer.Option(
+        Path("build/reconstruction"), "--out", help="Output directory"
+    ),
     overwrite: bool = typer.Option(False, "--overwrite", help="Replace existing files"),
 ) -> None:
     """Generate a Flutter project from a behaviour specification.
@@ -36,7 +39,9 @@ def generate_run(
     left as explicit TODO markers rather than invented.
     """
     try:
-        parsed = BehaviourSpec.model_validate(json.loads(spec.read_text(encoding="utf-8")))
+        parsed = BehaviourSpec.model_validate(
+            json.loads(spec.read_text(encoding="utf-8"))
+        )
     except (json.JSONDecodeError, ValueError) as exc:
         typer.secho(f"could not read spec: {exc}", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=1)
@@ -62,7 +67,9 @@ def generate_run(
             typer.echo(f"  - {w}")
 
     if result.open_questions:
-        typer.secho("\nopen questions (analysis could not answer these)", fg=typer.colors.YELLOW)
+        typer.secho(
+            "\nopen questions (analysis could not answer these)", fg=typer.colors.YELLOW
+        )
         for q in result.open_questions:
             typer.echo(f"  - {q}")
 
@@ -76,7 +83,9 @@ def generate_run(
 @evaluate_cli.command("run")
 def evaluate_run(
     suite: Path = typer.Argument(..., exists=True, help="Reference suite JSON"),
-    out: Path = typer.Option(Path("reports/evaluation.md"), "--out", help="Markdown report"),
+    out: Path = typer.Option(
+        Path("reports/evaluation.md"), "--out", help="Markdown report"
+    ),
 ) -> None:
     """Score generated specs against hand-written references."""
     from .evaluate import load_suite

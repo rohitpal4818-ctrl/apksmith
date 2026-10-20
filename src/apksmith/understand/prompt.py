@@ -159,12 +159,12 @@ def render_static_facts(report: RiskReport) -> str:
         activities = [c.name for c in report.components if c.kind == "activity"]
         if activities:
             lines.append(f"\nDeclared activities ({len(activities)}):")
-            lines.append(", ".join(a.rsplit('.', 1)[-1] for a in activities[:25]))
+            lines.append(", ".join(a.rsplit(".", 1)[-1] for a in activities[:25]))
 
     services = [c.name for c in report.components if c.kind == "service"]
     if services:
         lines.append(f"\nDeclared services ({len(services)}):")
-        lines.append(", ".join(s.rsplit('.', 1)[-1] for s in services[:15]))
+        lines.append(", ".join(s.rsplit(".", 1)[-1] for s in services[:15]))
 
     return "\n".join(lines)
 
