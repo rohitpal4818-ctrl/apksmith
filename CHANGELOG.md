@@ -7,6 +7,8 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-20
+
 ### Added
 
 - **Groq as an M2 backend**, selectable with `--provider groq`. Groq's free
@@ -58,6 +60,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The version was stated twice, and the two disagreed.** `pyproject.toml`
+  said 0.1.0 while `apksmith.__version__` said 0.2.0, so `apksmith version`
+  printed 0.2.0 and the packaging metadata carried 0.1.0 -- the number that
+  would have reached an index was the wrong one. `pyproject.toml` now declares
+  `dynamic = ["version"]` and reads `apksmith.__version__`, and a test fails if
+  a literal version comes back.
 - **The MCP server could not start on a current install.** `pip install mcp`
   now resolves to 2.x, which renamed `FastMCP` to `MCPServer`, so
   `apksmith mcp` failed with "The MCP SDK is not installed" -- on a machine
@@ -188,5 +196,6 @@ M1. Static analysis and reporting.
 - androguard is extremely chatty at DEBUG. Silenced by default, re-enabled with
   `APKSMITH_DEBUG=1`.
 
-[Unreleased]: https://github.com/rohitpal4818-ctrl/apksmith/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/rohitpal4818-ctrl/apksmith/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/rohitpal4818-ctrl/apksmith/releases/tag/v0.3.0
 [0.2.0]: https://github.com/rohitpal4818-ctrl/apksmith/releases/tag/v0.2.0

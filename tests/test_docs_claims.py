@@ -71,3 +71,28 @@ def test_checker_catches_a_reintroduced_stale_claim(tmp_path):
     )
     assert result.returncode == 1, "the checker missed a stale claim"
     assert "97%" in result.stdout
+
+
+def test_packaging_version_has_one_source():
+    """pyproject must not restate the version.
+
+    It once said 0.1.0 while `apksmith.__version__` said 0.2.0 and the CLI
+    printed 0.2.0. The number a package index would have shown was the wrong
+    one, because it came from the file nobody runs.
+    """
+    import tomllib
+
+    import apksmith
+
+    data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+
+    assert "version" in data["project"].get("dynamic", []), (
+        "version is hard-coded in pyproject again; it will drift from the package"
+    )
+    attr = data["tool"]["setuptools"]["dynamic"]["version"]["attr"]
+    assert attr == "apksmith.__version__"
+
+    parts = apksmith.__version__.split(".")
+    assert len(parts) == 3 and all(part.isdigit() for part in parts), (
+        f"{apksmith.__version__!r} is not MAJOR.MINOR.PATCH"
+    )
