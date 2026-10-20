@@ -35,10 +35,12 @@ test:  ## Run the test suite
 	$(BIN) -m pytest
 
 lint:  ## Check formatting and lint rules
-	$(BIN) -m ruff check src tests
+	$(BIN) -m ruff check src tests scripts
+	$(BIN) -m ruff format --check src tests scripts
 
 format:  ## Apply formatting and safe fixes
-	$(BIN) -m ruff check src tests --fix
+	$(BIN) -m ruff check src tests scripts --fix
+	$(BIN) -m ruff format src tests scripts
 
 check: lint test  ## Everything CI runs
 
