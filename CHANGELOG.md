@@ -121,5 +121,5 @@ M1. Static analysis and reporting.
 - androguard is extremely chatty at DEBUG. Silenced by default, re-enabled with
   `APKSMITH_DEBUG=1`.
 
-[Unreleased]: https://github.com/YOUR-USERNAME/apksmith/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/YOUR-USERNAME/apksmith/releases/tag/v0.2.0
+[Unreleased]: https://github.com/rohitpal4818-ctrl/apksmith/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rohitpal4818-ctrl/apksmith/releases/tag/v0.2.0

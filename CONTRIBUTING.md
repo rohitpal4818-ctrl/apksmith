@@ -6,7 +6,7 @@ believes, and what a good pull request looks like.
 ## Setup
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/apksmith.git
+git clone https://github.com/rohitpal4818-ctrl/apksmith.git
 cd apksmith
 
 python -m venv .venv
