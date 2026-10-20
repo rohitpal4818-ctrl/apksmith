@@ -31,7 +31,14 @@ dependencies = [
 [project.optional-dependencies]
 # ruff is in the dev extras, not installed by CI separately: CONTRIBUTING
 # tells contributors that `pip install -e ".[dev]"` is all they need.
-dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5", "mcp>=1.0"]
+# The `mcp` extra exists because the MCP SDK is optional at run time: the CLI
+# imports it lazily, so `apksmith scan` works without it. `_require_mcp`'s
+# error message points at this extra, and a test asserts it is declared.
+# Pinned below 2.0 on purpose: mcp 2.x renamed FastMCP to MCPServer and changed
+# the tool-registration API. Widening this without porting the server would
+# make `apksmith mcp` fail with an import error on a correct installation.
+mcp = ["mcp>=1.0,<2"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5", "mcp>=1.0,<2"]
 
 [project.scripts]
 apksmith = "apksmith.cli:main"

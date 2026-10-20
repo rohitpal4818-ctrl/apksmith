@@ -25,6 +25,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   list of phrases that used to be true.
 - **`reports/README.md`** recording how each committed sample was produced,
   including what it does not prove.
+- **`apksmith mcp`**, so the MCP server is reachable like every other stage
+  instead of only through `python -m apksmith.mcp_server`.
+- **An `mcp` extra** (`pip install -e ".[mcp]"`). `_require_mcp` had been
+  telling users to install `.[dev,mcp]` while no such extra existed.
+- **`docs/USAGE.md`**, a task-oriented guide: install, one section per command,
+  a table mapping each error message to its cause, and the honest limits.
 
 ### Changed
 
@@ -52,6 +58,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The MCP server could not start on a current install.** `pip install mcp`
+  now resolves to 2.x, which renamed `FastMCP` to `MCPServer`, so
+  `apksmith mcp` failed with "The MCP SDK is not installed" -- on a machine
+  where it was installed. The `[mcp]` extra is now pinned below 2.0, and the
+  error distinguishes "missing" from "wrong version" instead of telling the
+  user to install it again.
 - **`apk_understand` sent the model table where the API expects a model name.**
   The MCP tool called `LlmClient(model=DEFAULT_MODEL)`, so the request body
   carried a dict in the `model` field and would have failed after the app had

@@ -133,13 +133,28 @@ request to Groq. Treat it as untested until someone does.
 ### As an MCP server
 
 ```bash
-pip install mcp
-python -m apksmith.mcp_server
+pip install -e ".[mcp]"
+apksmith mcp
+```
+
+That speaks stdio, so it is meant to be launched by an MCP client. For Claude
+Desktop or Cursor:
+
+```json
+{
+  "mcpServers": {
+    "apksmith": {
+      "command": "apksmith",
+      "args": ["mcp"],
+      "env": { "OPENROUTER_API_KEY": "sk-or-..." }
+    }
+  }
+}
 ```
 
 Tools: `apk_identity`, `apk_analyse`, `apk_decompile`, `apk_extract`,
 `apk_understand`, `apk_generate`, `apk_coverage`. Only `apk_understand` needs
-an API key.
+an API key, and it also takes `provider: "groq"`.
 
 ---
 
@@ -178,7 +193,7 @@ apksmith/
     evaluate.py   M5 scoring logic (no CLI)
     mcp_server.py M4: the same operations as seven agent tools
     fileio.py     the one place output files are written
-    cli.py        root command app: scan, coverage, version
+    cli.py        root command app: scan, coverage, version, mcp
 
   tests/          one file per concern; see docs/TESTING.md
   evaluation/     hand-written references and an example spec
@@ -236,7 +251,7 @@ is a test asserting F-Droid does not score above 95.
 ## Testing
 
 ```bash
-pytest                    # 191 tests, no key or network needed
+pytest                    # 194 tests, no key or network needed
 ruff check src tests      # lint
 ruff format src tests     # format
 ```
@@ -281,6 +296,7 @@ apksmith generate run evaluation/example_spec.json --out build/recon
 ## Further reading
 
 - [`docs/`](docs/README.md) — index of every document
+- [`docs/USAGE.md`](docs/USAGE.md) — every command, and what each error means
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how it fits together and
   why the hard parts are hard
 - [`docs/TESTING.md`](docs/TESTING.md) — what each test file pins, and what it

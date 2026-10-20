@@ -353,3 +353,64 @@ def test_mcp_tools_are_declared():
     ):
         assert f"def {tool}(" in source, f"tool {tool} missing"
     assert source.count("@mcp.tool()") >= 7
+
+
+def test_mcp_server_actually_registers_the_documented_tools():
+    """Read the server's own registry, not the source text.
+
+    The grep above proves the decorators are written. This proves they run:
+    a tool defined inside the server factory can be shadowed, renamed or
+    silently dropped by the SDK, and only asking the server reveals it.
+    """
+    pytest.importorskip("mcp")
+    import asyncio
+
+    import apksmith.mcp_server as mcp_server
+
+    if not mcp_server.HAVE_MCP:
+        pytest.skip("installed mcp does not provide the 1.x FastMCP API")
+
+    try:
+        server = mcp_server.build_server()
+        names = {tool.name for tool in asyncio.run(server.list_tools())}
+    finally:
+        if mcp_server._LIVE_WORKSPACES:
+            mcp_server._LIVE_WORKSPACES[-1].cleanup()
+
+    assert names == {
+        "apk_identity",
+        "apk_analyse",
+        "apk_decompile",
+        "apk_extract",
+        "apk_understand",
+        "apk_generate",
+        "apk_coverage",
+    }
+
+
+def test_mcp_command_is_registered():
+    """M4 must be reachable as a command, not only through `python -m`."""
+    from apksmith.cli import cli
+
+    names = {
+        command.name or command.callback.__name__ for command in cli.registered_commands
+    }
+    assert "mcp" in names
+
+
+def test_mcp_extra_is_declared_and_pinned_below_2():
+    """`_require_mcp` tells the user to install an extra; it must exist.
+
+    It is also pinned below 2.0: mcp 2.x renamed FastMCP to MCPServer, so an
+    unpinned extra installs a version this project cannot import.
+    """
+    import tomllib
+
+    pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+    data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+
+    extras = data["project"]["optional-dependencies"]
+    assert "mcp" in extras, "the [mcp] extra referenced by _require_mcp is missing"
+    assert any("<2" in requirement for requirement in extras["mcp"]), (
+        "the mcp extra must exclude 2.x until the server is ported"
+    )

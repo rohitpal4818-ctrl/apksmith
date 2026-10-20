@@ -96,6 +96,18 @@ def version() -> None:
     typer.echo(__version__)
 
 
+@cli.command()
+def mcp() -> None:
+    """Run the MCP server over stdio, so an agent can drive the pipeline.
+
+    Needs the optional SDK (``pip install -e ".\\[mcp]"``). Speaks stdio, so it
+    is meant to be launched by an MCP client rather than typed into a terminal.
+    """
+    from .mcp_server import main as run_mcp_server
+
+    run_mcp_server()
+
+
 def main() -> None:
     """Console-script entry point."""
     try:

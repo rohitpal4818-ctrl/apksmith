@@ -51,7 +51,7 @@ never go wrong again. They have names like
 | `test_understand.py` | Extraction, class ranking, chunking, spec merging |
 | `test_pipeline_e2e.py` | Full M2 run through a stub model; M2 output consumed by M3 |
 | `test_providers.py` | Provider routing, env isolation, cache separation, 429 messages |
-| `test_generate_eval.py` | M3 generation, M5 scoring, MCP tool surface, LF output |
+| `test_generate_eval.py` | M3 generation, M5 scoring, the MCP server's live tool registry, LF output |
 | `test_collisions.py` | Generated filename collisions, which used to overwrite files |
 | `test_cli_validation.py` | Bad `--provider` and `--decompiled` fail before any work |
 | `test_temp_cleanup.py` | The temp-directory deletion bug, by grepping for the pattern |
@@ -68,6 +68,11 @@ never go wrong again. They have names like
 - **Decompilation itself.** `test_pipeline_e2e.py` uses pre-decompiled fixtures
   or `--dry-run`, because requiring a JRE would make the default suite
   un-runnable. CI installs Java and decompiles a real APK instead.
+
+The MCP tests are the exception to "no live server": when the SDK is installed,
+`build_server()` is asked for its tool list rather than the source being
+grepped. A tool that is written but not registered is a real failure mode, and
+it is invisible to a text search.
 
 ## What CI runs
 

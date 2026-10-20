@@ -35,9 +35,14 @@ try:
     from mcp.server.fastmcp import FastMCP
 
     HAVE_MCP = True
-except ImportError:  # pragma: no cover
+except ImportError as exc:  # pragma: no cover - depends on the environment
     FastMCP = None  # type: ignore[assignment]
     HAVE_MCP = False
+    # Kept so the error can tell "not installed" apart from "wrong version".
+    # mcp 2.x renamed FastMCP to MCPServer, so `import mcp` succeeds while this
+    # import fails -- and the old message then told the user to install the
+    # package they had already installed.
+    _MCP_IMPORT_ERROR: ImportError | None = exc
 
 
 SERVER_NAME = "apksmith"
@@ -63,12 +68,31 @@ analysis, and generated projects are scaffolds with the logic left as TODO.
 
 
 def _require_mcp() -> None:
-    if not HAVE_MCP:
+    """Fail with a message that matches the actual cause.
+
+    Three situations look identical from an ``ImportError`` and need different
+    answers: the SDK is absent, the SDK is present but too new, and the SDK is
+    present but something else inside it broke. The second one used to tell the
+    user to install a package that was already installed.
+    """
+    if HAVE_MCP:
+        return
+
+    try:
+        import mcp  # noqa: F401
+    except ImportError:
         raise ApkSmithError(
-            "The MCP SDK is not installed. Install it with:\n"
-            "    pip install mcp\n"
-            'or install the dev extras: pip install -e ".[dev,mcp]"'
+            'The MCP SDK is not installed. Install it with:\n    pip install -e ".[mcp]"'
         )
+
+    version = getattr(mcp, "__version__", "unknown")
+    raise ApkSmithError(
+        f"The MCP SDK is installed (version {version}), but this project needs "
+        "the 1.x API. mcp 2.x renamed FastMCP to MCPServer.\n"
+        "Fix the version rather than installing it again:\n"
+        '    pip install "mcp>=1.0,<2"\n'
+        f"Original import error: {_MCP_IMPORT_ERROR}"
+    )
 
 
 # --------------------------------------------------------------------------- #

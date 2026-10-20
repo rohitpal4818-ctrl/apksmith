@@ -3,6 +3,7 @@
 | Document | Read it when |
 |---|---|
 | [`../README.md`](../README.md) | You want to know what this does, how to install it, and what it cannot do. Start here. |
+| [`USAGE.md`](USAGE.md) | You want to run it: every command, every option that matters, and what each error means. |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | You want to know how it is put together and why the hard parts are hard. |
 | [`TESTING.md`](TESTING.md) | You are changing something and want to know what the tests pin, and what they deliberately do not. |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | You want to set up a development environment or send a change. |

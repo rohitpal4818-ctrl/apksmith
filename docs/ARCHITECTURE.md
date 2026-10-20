@@ -65,9 +65,11 @@ imports:
   only place in the codebase that reads `OPENROUTER_API_KEY`, and it reads it
   once, to construct the client.
 
-The root commands (`scan`, `coverage`, `version`) are small enough to live in
-`cli.py` directly. Everything with more than one option group gets its own
-module under `commands/`.
+The root commands (`scan`, `coverage`, `version`, `mcp`) are small enough to
+live in `cli.py` directly. Everything with more than one option group gets its
+own module under `commands/`. `mcp` is four lines because the server it starts
+lives in `mcp_server.py`; the command exists so that M4 is reachable the same
+way as every other stage, rather than only through `python -m`.
 
 Directory names describe responsibility, not milestone. The milestones are a
 sequence of work, not a decomposition of the problem, and a file called
