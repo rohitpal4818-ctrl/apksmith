@@ -10,6 +10,7 @@ venv/
 # Tests
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 
 # Tooling
