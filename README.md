@@ -14,8 +14,9 @@ plus:  MCP server so an agent can drive it (M4)
        evaluation harness that scores the output (M5)
 ```
 
-**Status:** all five milestones have code and tests. M2 has never been run
-against a live model, because that needs an API key.
+**Status:** all five milestones have code and tests. M2 has been run against a
+live model once, on F-Droid, with the output committed to
+[`reports/fdroid-understanding.md`](reports/fdroid-understanding.md).
 
 ---
 
@@ -71,7 +72,7 @@ apksmith scan app.apk --json reports/app.json --markdown reports/app.md
 # M2: what does it do? Needs jadx and an API key (OpenRouter or Groq).
 apksmith understand run app.apk --dry-run          # see the prompts, free
 apksmith understand run app.apk --json reports/understanding.json
-apksmith understand run app.apk --provider groq    # 1,000 req/day free
+apksmith understand run app.apk --provider groq    # free tier; see Groq console
 
 # M3: spec -> project. No API key.
 apksmith generate run reports/understanding.json --out build/recon
@@ -92,7 +93,11 @@ M2 is the only stage that calls a model. Two backends, both with a free tier:
 | Provider | Flag | Env var | Default model | Free tier |
 |---|---|---|---|---|
 | OpenRouter | *(default)* | `OPENROUTER_API_KEY` | `nvidia/nemotron-3-ultra-550b-a55b:free` | 20 req/min, 50 req/day |
-| Groq | `--provider groq` | `GROQ_API_KEY` | `openai/gpt-oss-120b` | 30 req/min, 1,000 req/day, 200k tokens/day |
+| Groq | `--provider groq` | `GROQ_API_KEY` | `openai/gpt-oss-120b` | set per model; see <https://console.groq.com/docs/rate-limits> |
+
+Free-tier limits change without notice, so they are not repeated here as if
+they were permanent. OpenRouter's numbers were accurate when the committed
+F-Droid run was made.
 
 ```bash
 # OpenRouter
@@ -115,12 +120,15 @@ Two things to know before you budget a run:
 - **Responses are cached by content hash** under `.apksmith-cache/`. Re-running
   on an unchanged APK costs nothing. The cache key includes the provider and
   model, so switching backends does not replay another provider's answer.
-- **Tokens bind before requests do.** An F-Droid-sized run is roughly 56k
-  tokens across 10 calls. That is 3 runs/day on Groq's free tier even though
-  the request cap would allow 1,000.
+- **Tokens bind before requests do.** The committed F-Droid run made 10 calls.
+  Its cached responses total about 54k characters, roughly 13k output tokens,
+  and each prompt adds several thousand more. A request allowance is meaningless
+  if the daily token allowance is the smaller of the two, so budget against
+  tokens and check the provider's current cap.
 
-Groq's 8k tokens/minute limit is the practical constraint: one chunk prompt is
-around 4k tokens, so expect two calls a minute. Batch work only, not interactive.
+**Only the OpenRouter path has been run against a live API.** The Groq routing
+is covered by tests against a stub model, but this project has never sent a
+request to Groq. Treat it as untested until someone does.
 
 ### As an MCP server
 
@@ -178,17 +186,21 @@ situation from one that is used.
 Code-derived claims are capped lower, because finding a string does not prove a
 code path reaches it.
 
-**Only ~1% of an APK is the app's own code.** On F-Droid, 990 of 11,949
-decompiled files. Filtering by package before spending any tokens is the single
-biggest cost saving in the pipeline. Decompiled text is then reduced a further
-97% by stripping `@Metadata` blobs, framework imports and synthetic lambda
-classes.
+**Most of an APK is somebody else's code.** On F-Droid, 3,881 of 24,520
+classes belong to the app; the rest is Compose, Kotlin, bouncycastle and
+friends. Filtering by package before spending any tokens is the single
+biggest cost saving in the pipeline. The surviving decompiled text is then
+reduced by roughly 85% by stripping `@Metadata` blobs, framework imports and
+synthetic lambda classes. That 85% figure is a one-off measurement in
+`understand/extract.py`; it is not asserted in CI.
 
 **The manifest package is not a source prefix.** F-Droid declares
-`org.fdroid.fdroid` but ships code under `org/fdroid/`. Filtering on the package
-name found 54 classes instead of 845 and looked like "this app is trivial"
-rather than like a bug. The resolver trims segments and anchors on the entry
-point; see `resolve_app_prefixes`.
+`org.fdroid.fdroid`, but its launcher and most of its code live under
+`org.fdroid`. Filtering on the declared package counts 161 own classes instead
+of 3,881 and makes the app look almost entirely third-party, which reads as
+"this app is trivial" rather than as a bug. The resolver trims segments and
+anchors on the launcher activity; see `resolve_own_class_prefix` and
+`resolve_app_prefixes`.
 
 **Risk score saturates.** Summing severity weights pins every app at 100.
 Instead `100 × (1 − e^(−total/200))`, so growth stays meaningful:
@@ -208,7 +220,7 @@ is a test asserting F-Droid does not score above 95.
 ## Testing
 
 ```bash
-pytest                    # 101 tests, no key or network needed
+pytest                    # 188 tests, no key or network needed
 ruff check src tests      # lint
 ruff format src tests     # format
 ```
@@ -264,19 +276,21 @@ apksmith generate run evaluation/example_spec.json --out build/recon
 | Milestone | Contents | Status |
 |---|---|---|
 | M1 | Static analysis + reporting | Done |
-| M2 | LLM understanding layer | Built and tested; **needs an API key to prove live** |
+| M2 | LLM understanding layer | Done; live on OpenRouter (F-Droid), Groq untested |
 | M3 | Flutter project generation | Done |
 | M4 | MCP server | Done |
 | M5 | Evaluation harness | Done |
 
 Next steps, in order of value:
 
-1. Run M2 on F-Droid with a real key and see whether the free model returns
-   usable JSON. The pipeline is tested with a stub, but real-model behaviour is
-   unverified.
-2. Grow the evaluation suite past two apps. Two is a demonstration, not a
+1. Run M2 on an **obfuscated** app. The committed live run used an unobfuscated
+   F-Droid build; short class names may leave far less for the model to work
+   with, and that is the claim most likely to break.
+2. Send one request through the Groq backend. The wiring is tested with a stub,
+   not with Groq itself.
+3. Grow the evaluation suite past two apps. Two is a demonstration, not a
    benchmark.
-3. Add real cross-reference analysis so findings can be promoted from
+4. Add real cross-reference analysis so findings can be promoted from
    "a string exists" to "this method calls this API".
 
 ---

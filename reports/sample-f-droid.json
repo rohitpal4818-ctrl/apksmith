@@ -1331,9 +1331,9 @@
   "metrics": {
     "dex_count": 3,
     "total_classes": 24520,
-    "own_classes": 161,
-    "third_party_classes": 24359,
-    "third_party_ratio": 0.9934,
+    "own_classes": 3881,
+    "third_party_classes": 20639,
+    "third_party_ratio": 0.8417,
     "total_methods": 119203,
     "total_strings": 128732,
     "printable_strings": 127531,

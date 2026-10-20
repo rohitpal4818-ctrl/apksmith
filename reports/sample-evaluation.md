@@ -45,4 +45,4 @@ Scores measure **agreement with an independent hand-written reference**, not tru
 - `precision` low means it invented things. That is worse.
 - A low `purpose_token_overlap` with good screen F1 means the structure was found but the model could not summarise it.
 
-Three apps is a demonstration, not a benchmark. Treat the numbers as a regression signal: if a change makes them worse, that change is bad.
+A suite of 2 apps is a demonstration, not a benchmark. Treat the numbers as a regression signal: if a change makes them worse, that change is bad.

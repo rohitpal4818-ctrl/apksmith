@@ -167,6 +167,21 @@ def test_no_unfilled_placeholders(generated: GenerationResult):
         assert "}}" not in gf.content or gf.path.endswith(".md"), gf.path
 
 
+def test_written_project_uses_lf_line_endings(
+    generated: GenerationResult, tmp_path: Path
+):
+    """Generated files must be byte-identical across platforms.
+
+    ``Path.write_text`` translates newlines to ``os.linesep`` unless told
+    otherwise, which would make a Windows run produce different bytes from a
+    Linux run. The README calls generation deterministic, so it should be.
+    """
+    written = generated.write(tmp_path)
+    assert written, "nothing was written"
+    for path in written:
+        assert b"\r\n" not in path.read_bytes(), f"{path.name} contains CRLF"
+
+
 def test_dart_braces_are_balanced(generated: GenerationResult):
     """Cheap proxy for syntactic validity."""
     for gf in generated.files:

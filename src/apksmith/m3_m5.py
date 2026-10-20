@@ -97,7 +97,7 @@ def evaluate_run(
         raise typer.Exit(code=1)
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(report.to_markdown(), encoding="utf-8")
+    out.write_text(report.to_markdown(), encoding="utf-8", newline="\n")
 
     typer.secho(f"evaluated {len(report.cases)} case(s) -> {out}", fg=typer.colors.GREEN)
     typer.echo(f"  mean F1 across cases: {report.mean_f1:.3f}")

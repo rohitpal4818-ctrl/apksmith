@@ -10,14 +10,21 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - **Groq as an M2 backend**, selectable with `--provider groq`. Groq's free
-  tier allows 30 requests/minute, 1,000 requests/day and 200k tokens/day, which
-  is twenty times the request allowance of OpenRouter's free tier. The default
-  model is `openai/gpt-oss-120b`, Groq's recommended replacement for the Llama
-  models it retired from the free tier in August 2026. `--model` accepts any id
-  the chosen provider serves.
+  tier is larger than OpenRouter's on requests, though the published limits
+  change per model and are not repeated here. The default model is
+  `openai/gpt-oss-120b`, Groq's recommended replacement for the Llama models it
+  retired from the free tier in August 2026. `--model` accepts any id the
+  chosen provider serves. The routing is tested against a stub; no request has
+  been sent to Groq yet.
 - `--provider` and `--model` on `apksmith understand run`; the mock-friendly
   `LlmClient(provider=...)` routes endpoints, env vars and defaults per backend.
 - The `--dry-run` output now names the provider and model it would have used.
+- **`scripts/check_docs.py`**, run in CI, which re-derives the checkable claims
+  in the README (test count, MCP tool list, sample metrics, evaluation suite
+  size) and fails when the prose disagrees with the artifacts. It also bans a
+  list of phrases that used to be true.
+- **`reports/README.md`** recording how each committed sample was produced,
+  including what it does not prove.
 
 ### Changed
 
@@ -29,7 +36,27 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- **`understand` deleted the system temp directory.** Cleanup called
+- **`own_classes` was counted from the manifest package**, which is the one
+  thing `docs/ARCHITECTURE.md` warns not to do. F-Droid declares
+  `org.fdroid.fdroid` but ships under `org.fdroid`, so the report claimed 161
+  own classes instead of 3,881 and a third-party ratio of 99.3% instead of
+  84.2%. `resolve_own_class_prefix` now mirrors `resolve_app_prefixes` at the
+  DEX level and anchors on the launcher activity. `reports/sample-f-droid.*`
+  was regenerated; the risk score is unchanged at 78.
+- **Documented figures that could not be reproduced.** The README claimed "~1%
+  of an APK is the app's own code" (it is ~16% of classes), quoted `990 of
+  11,949` decompiled files alongside it, said text was reduced by 97% while
+  `extract.py` measures 85%, said "54 classes instead of 845" where the real
+  pair is 161 and 3,881, and described a two-app evaluation suite as three
+  apps. All now use figures that can be re-derived from the committed APK.
+- **M2 was described as never having been run live** in the README, the
+  architecture doc and the changelog, after the F-Droid run had already been
+  committed. Status text now matches reality, and the Groq backend is labelled
+  as untested because it is.
+- Generated reports and Flutter files inherited the platform's line ending, so
+  a Windows run produced different bytes from a Linux run despite generation
+  being described as deterministic. Every writer now passes `newline="\n"`.
+- `understand` deleted the system temp directory. Cleanup called
   `shutil.rmtree(tmp_dir.parent)`, and because `mkdtemp()` returns
   `<tempdir>/apksmith-m2-XXXX`, `.parent` is the user's Temp folder. Every
   temporary file on the machine was removed after a run. It now removes only
@@ -50,9 +77,9 @@ M2 through M5. The project now runs from an APK to a runnable project.
 ### Added
 
 - **`understand/` (M2)** — LLM understanding layer. Filters decompiled Java to
-  compact class summaries (97% reduction measured), ranks classes by role,
-  interleaves chunks so every batch has both screens and data classes, then
-  describes and merges in two passes. Disk-cached by content hash.
+  compact class summaries (roughly 85% byte reduction measured), ranks classes
+  by role, interleaves chunks so every batch has both screens and data classes,
+  then describes and merges in two passes. Disk-cached by content hash.
 - **`resolve_app_prefixes`** — works out which source subtree is the app's own.
   Handles the manifest package not being a source prefix, and library
   components injected into the manifest.
@@ -87,8 +114,10 @@ M2 through M5. The project now runs from an APK to a runnable project.
 
 ### Known issues
 
-- M2 has never been run against a live model. Prompt and parse paths are
-  covered by tests; real-model behaviour is unverified.
+- M2 has been run live once, on F-Droid, an unobfuscated app. Behaviour on
+  obfuscated code is unmeasured.
+- The Groq backend is wired and tested against a stub, but no request has been
+  sent to Groq.
 - No cross-reference analysis, so findings stay at "a string exists".
 - The evaluation suite covers two apps. Treat its numbers as a regression
   signal, not a benchmark.

@@ -59,28 +59,34 @@ kilobytes of escaped binary, forty framework imports, and dozens of
 compiler-generated lambda classes. Feeding that to a model wastes the context
 window on characters that mean nothing.
 
-`understand/extract.py` reduces measured text by **97%** on F-Droid, keeping the
-class declaration, field names, method signatures, string literals, and a short
-body window. Everything it discards is listed in that module's docstring.
+`understand/extract.py` reduces measured text by roughly **85%** on F-Droid,
+keeping the class declaration, field names, method signatures, string literals,
+and a short body window. Everything it discards is listed in that module's
+docstring. That figure comes from a single hand measurement, not a CI
+assertion, so treat it as an order of magnitude rather than a precise number.
 
-### 92% of an APK is somebody else's code
+### 84% of an APK is somebody else's code
 
-On F-Droid, 990 of 11,949 decompiled files belong to the app. The rest is
-OkHttp, Compose, Room and friends. `resolve_app_prefixes` decides which subtree
-is the app's own, and it is subtler than it looks:
+On F-Droid, 3,881 of 24,520 DEX classes belong to the app. The rest is OkHttp,
+Compose, bouncycastle and friends. `resolve_own_class_prefix` (for metrics) and
+`resolve_app_prefixes` (for decompiled source) decide which subtree is the
+app's own, and it is subtler than it looks:
 
 - The manifest package is often **not** a source prefix. F-Droid declares
-  `org.fdroid.fdroid` and ships code under `org/fdroid/`.
+  `org.fdroid.fdroid`, but its launcher is `org.fdroid.IconActivity` and most
+  of its code lives under `org.fdroid`. Counting the declared package finds 161
+  classes instead of 3,881.
 - A library can **inject components** into the manifest. Room registers a
   service, ACRA registers crash-reporting components. Counting components to
   find the app's package picks `androidx` or `org` instead.
-- So: trim segments from the manifest package and from the entry point's
-  package, and take the narrowest one that both covers the entry point and
-  contains a meaningful number of source files.
+- So: trim segments from the manifest package and from the launcher's package,
+  and take the narrowest one that both covers the launcher and contains a
+  meaningful number of classes.
 
-Getting this wrong does not raise an error. It returns 54 classes instead of
-845 and the app looks trivially small. That failure mode is why
-`test_resolve_prefix_handles_manifest_package_with_extra_segment` exists.
+Getting this wrong does not raise an error. It reports 161 own classes instead
+of 3,881, the third-party ratio reads 99% instead of 84%, and the app looks
+trivially small. That failure mode shipped in the first published report and is
+now pinned by `test_own_prefix_follows_entry_point_past_a_deeper_manifest_package`.
 
 ### Chunking decides output quality
 
@@ -112,15 +118,19 @@ operational, not structural.
 
 | | OpenRouter | Groq |
 |---|---|---|
-| Free requests/day | 50 | 1,000 |
-| Free tokens/day | unpublished | 200,000 |
-| Binding limit | requests | tokens |
+| Free tier | 20 req/min, 50 req/day | set per model; check the provider |
+| Binding limit | requests | usually tokens |
 
-The token limit is what actually decides how many runs you get. An
-F-Droid-sized understanding run is around 56,000 tokens across 10 calls, so
-Groq's 200,000/day buys three runs while its 1,000 requests/day would have
-allowed a hundred. Reporting usage per run matters more than reporting requests
-per run.
+Limits move. Rather than hard-code numbers that will rot, the point worth
+keeping is the shape of the problem: the token limit, not the request limit, is
+usually what decides how many runs you get. The committed F-Droid run made 10
+calls whose cached responses total about 54k characters, roughly 13k output
+tokens, with prompts adding several thousand tokens each. Reporting usage per
+run matters more than reporting requests per run.
+
+**Only OpenRouter has served a real request.** Groq's endpoint, environment
+variable, default model and cache separation are pinned by tests, but no Groq
+call has been made, so treat its limits and behaviour as second-hand.
 
 ### Generation consults no model
 
@@ -159,7 +169,7 @@ overlap on the purpose statement. These are reproducible and every number could
 be argued with, which is the point: disagreement is visible.
 
 They measure agreement with a human description. They do not measure truth, and
-three apps is a demonstration rather than a benchmark. The report says so.
+two apps is a demonstration rather than a benchmark. The report says so.
 
 ## Known gaps
 
@@ -168,5 +178,6 @@ three apps is a demonstration rather than a benchmark. The report says so.
 | No cross-reference analysis | Findings stay at "a string exists" rather than "this method calls this API" |
 | No runtime analysis | Dynamically loaded code, encrypted assets and runtime-decided endpoints are invisible |
 | No native code analysis | `.so` libraries are inventoried and otherwise treated as black boxes |
-| M2 never run live | The prompt and parse paths are proven by tests, not by a real free model |
+| M2 measured on one unobfuscated app | The committed live run used F-Droid; obfuscated code may yield much less |
+| Groq backend never run live | Routing and cache keys are tested against a stub, not against Groq |
 | Evaluation suite is small | Scores are a regression signal, not a benchmark |

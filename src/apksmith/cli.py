@@ -47,7 +47,7 @@ def _run(path: Path, verbose: bool) -> object:
 def _write(path: Path, content: str) -> None:
     """Write a report, creating parent directories as needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    path.write_text(content, encoding="utf-8", newline="\n")
 
 
 @cli.command()

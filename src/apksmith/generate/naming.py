@@ -60,7 +60,7 @@ class GenerationResult:
             if dest.exists() and not overwrite:
                 continue
             dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(gf.content, encoding="utf-8")
+            dest.write_text(gf.content, encoding="utf-8", newline="\n")
             written.append(dest)
         return written
 

@@ -20,7 +20,11 @@ from pathlib import Path
 import pytest
 
 from apksmith.analyze.code import _looks_like_key, analyse_endpoints
-from apksmith.analyze.structure import analyse_export_surface, obfuscation_metrics
+from apksmith.analyze.structure import (
+    analyse_export_surface,
+    obfuscation_metrics,
+    resolve_own_class_prefix,
+)
 from apksmith.models import Category, Confidence, Finding, Severity
 from apksmith.report import to_json, to_markdown, to_terminal
 
@@ -186,6 +190,54 @@ def test_obfuscation_metrics_on_synthetic_names():
     m = obfuscation_metrics(L(), "com.example")
     assert m["total_classes"] == 5
     assert 0.0 <= m["short_name_ratio"] <= 1.0
+
+
+# --------------------------------------------------------------------------- #
+# Own-code prefix resolution
+#
+# These pin the bug that made F-Droid look almost entirely third-party: the
+# metric counted classes under the manifest package only, which held 161 of the
+# app's 3,881 classes.
+# --------------------------------------------------------------------------- #
+def test_own_prefix_follows_entry_point_past_a_deeper_manifest_package():
+    # The F-Droid shape: package org.fdroid.fdroid, launcher under org.fdroid.
+    classes = [f"Lorg/fdroid/ui/Screen{i};" for i in range(40)]
+    classes += [f"Lorg/fdroid/fdroid/nearby/Nearby{i};" for i in range(30)]
+    prefix = resolve_own_class_prefix(
+        classes, "org.fdroid.fdroid", "org.fdroid.IconActivity"
+    )
+    assert prefix == "Lorg/fdroid"
+
+
+def test_own_prefix_never_widens_past_the_entry_point():
+    # org.fdroid must win before the walk reaches the shared `org` parent,
+    # which would collect bouncycastle and every other org.* library.
+    classes = [f"Lorg/fdroid/ui/Screen{i};" for i in range(40)]
+    classes += [f"Lorg/bouncycastle/crypto/Thing{i};" for i in range(500)]
+    prefix = resolve_own_class_prefix(
+        classes, "org.fdroid.fdroid", "org.fdroid.IconActivity"
+    )
+    assert prefix == "Lorg/fdroid"
+
+
+def test_own_prefix_uses_the_declared_package_for_a_plain_app():
+    classes = [f"Lcom/example/app/Screen{i};" for i in range(30)]
+    classes += [f"Landroidx/compose/Thing{i};" for i in range(300)]
+    prefix = resolve_own_class_prefix(classes, "com.example.app", "com.example.app.Main")
+    assert prefix == "Lcom/example/app"
+
+
+def test_own_prefix_falls_back_to_the_declared_package_when_tiny():
+    # Fewer classes than min_classes and no launcher: the declared package is
+    # still a better guess than the shared `com` parent.
+    classes = [f"Lcom/acme/tiny/A{i};" for i in range(5)]
+    classes += [f"Lcom/other/B{i};" for i in range(500)]
+    prefix = resolve_own_class_prefix(classes, "com.acme.tiny", None)
+    assert prefix == "Lcom/acme/tiny"
+
+
+def test_own_prefix_is_empty_without_classes():
+    assert resolve_own_class_prefix([], "com.example", "com.example.Main") == ""
 
 
 def test_renderers_do_not_crash_on_minimal_report():

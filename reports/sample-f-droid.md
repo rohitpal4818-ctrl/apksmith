@@ -12,9 +12,9 @@
 | Metric | Value |
 | --- | --- |
 | total classes | 24520 |
-| own classes | 161 |
-| third party classes | 24359 |
-| third party ratio | 0.9934 |
+| own classes | 3881 |
+| third party classes | 20639 |
+| third party ratio | 0.8417 |
 | total methods | 119203 |
 | endpoint count | 44 |
 | component count | 36 |

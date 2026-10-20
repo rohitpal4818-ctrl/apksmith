@@ -133,12 +133,115 @@ def obfuscation_metrics(loaded, package: str) -> dict[str, float]:
     }
 
 
+#: Namespaces owned by libraries, never by the app being analysed.
+_LIBRARY_NAMESPACES = (
+    "androidx.",
+    "android.",
+    "com.google.",
+    "com.android.",
+    "kotlin.",
+    "kotlinx.",
+    "com.squareup.",
+    "dagger.",
+    "javax.",
+    "java.",
+    "sun.",
+    "org.jetbrains.",
+    "org.json.",
+    "org.apache.",
+)
+
+
+def resolve_own_class_prefix(
+    classes: list[str],
+    package: str,
+    entry_point: str | None,
+    min_classes: int = 20,
+) -> str:
+    """Return the DEX prefix holding the app's own classes, e.g. ``Lorg/fdroid``.
+
+    The manifest package is not a reliable prefix. F-Droid declares
+    ``org.fdroid.fdroid`` but most of its code lives under ``org.fdroid``;
+    filtering on the declared package counted 161 own classes when the app
+    actually ships 3,881, which made it look almost entirely third-party.
+
+    The rule is the narrowest prefix that still covers the launcher activity and
+    matches a meaningful number of classes. Trimming stops as soon as the entry
+    point falls outside the prefix, which is what stops the walk at
+    ``org/fdroid`` instead of sliding up to ``org`` and collecting bouncycastle.
+
+    This mirrors ``understand.pipeline.resolve_app_prefixes``, which solves the
+    same problem against decompiled files. It is a separate implementation
+    because these metrics come from DEX class names, before anything is
+    decompiled.
+    """
+    if not classes:
+        return ""
+
+    def count(prefix: str) -> int:
+        needle = "L" + prefix + "/"
+        return sum(1 for c in classes if c.startswith(needle))
+
+    def covers(prefix: str, fqcn: str | None) -> bool:
+        if not fqcn:
+            return False
+        dotted = prefix.replace("/", ".")
+        return fqcn == dotted or fqcn.startswith(dotted + ".")
+
+    def owned(dotted: str) -> bool:
+        return not dotted.startswith(_LIBRARY_NAMESPACES)
+
+    # Narrowest first: each package is trimmed from the right, so a more
+    # specific prefix is always tried before its parent.
+    candidates: list[str] = []
+
+    def add(dotted: str) -> None:
+        parts = [p for p in dotted.split(".") if p]
+        for i in range(len(parts), 0, -1):
+            candidate = "/".join(parts[:i])
+            if candidate not in candidates and owned(candidate.replace("/", ".") + "."):
+                candidates.append(candidate)
+
+    add(package)
+    if entry_point and "." in entry_point:
+        add(entry_point.rsplit(".", 1)[0])
+
+    for candidate in candidates:
+        if covers(candidate, entry_point) and count(candidate) >= min_classes:
+            return "L" + candidate
+
+    # Nothing covers the entry point. The declared package is still the safest
+    # narrow guess when it captured anything at all.
+    declared = package.replace(".", "/")
+    if declared and count(declared) > 0:
+        return "L" + declared
+
+    for candidate in candidates:
+        if count(candidate) >= min_classes:
+            return "L" + candidate
+
+    return "L" + candidates[0] if candidates else ""
+
+
 def collect_metrics(loaded, components: list, endpoints: list) -> dict:
     """Assemble the numeric summary attached to a RiskReport."""
     ident_package = loaded.apk.get_package() or ""
-    own_prefix = f"L{ident_package.replace('.', '/')}" if ident_package else ""
 
-    own_classes = [c for c in loaded.dex.classes if c.startswith(own_prefix)]
+    # The launcher activity names a real class, so its package is app code by
+    # construction. It is a better anchor than the manifest package, which can
+    # carry a flavour or version segment that never appears in the source tree.
+    entry_point = next(
+        (
+            c.name
+            for c in components
+            if c.kind == "activity" and "LAUNCHER" in c.intent_filters
+        ),
+        None,
+    )
+    own_prefix = resolve_own_class_prefix(loaded.dex.classes, ident_package, entry_point)
+
+    own_classes = [c for c in loaded.dex.classes if c.startswith(own_prefix + "/")]
+
     third_party = len(loaded.dex.classes) - len(own_classes)
 
     return {

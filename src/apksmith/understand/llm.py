@@ -161,7 +161,9 @@ class LlmClient:
         with contextlib.suppress(OSError):
             # A cache miss is not worth failing the run over.
             path.write_text(
-                json.dumps({"key": key, "content": content}), encoding="utf-8"
+                json.dumps({"key": key, "content": content}),
+                encoding="utf-8",
+                newline="\n",
             )
 
     # -- budget ----------------------------------------------------------- #

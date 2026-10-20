@@ -31,7 +31,7 @@ M2 needs jadx on `PATH`. Download from
 ## Running things
 
 ```bash
-pytest                          # 101 tests, no key or network needed
+pytest                          # 188 tests, no key or network needed
 ruff check src tests            # lint
 ruff format src tests           # format
 ```

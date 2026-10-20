@@ -381,9 +381,9 @@ class SuiteReport:
             "- A low `purpose_token_overlap` with good screen F1 means the "
             "structure was found but the model could not summarise it.",
             "",
-            "Three apps is a demonstration, not a benchmark. Treat the numbers "
-            "as a regression signal: if a change makes them worse, that change "
-            "is bad.",
+            f"A suite of {len(self.cases)} apps is a demonstration, not a "
+            "benchmark. Treat the numbers as a regression signal: if a change "
+            "makes them worse, that change is bad.",
         ]
         return "\n".join(lines) + "\n"
 
@@ -429,4 +429,4 @@ def load_suite(path: Path) -> SuiteReport:
 
 def save_suite(path: Path, suite: SuiteReport) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(suite.to_markdown(), encoding="utf-8")
+    path.write_text(suite.to_markdown(), encoding="utf-8", newline="\n")
