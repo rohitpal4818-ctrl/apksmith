@@ -43,6 +43,9 @@ Read this before trusting any output.
 Requires Python 3.11+, and for decompilation, jadx.
 
 ```bash
+git clone https://github.com/rohitpal4818-ctrl/apksmith.git
+cd apksmith
+
 python -m venv .venv
 
 # Windows
@@ -53,6 +56,9 @@ source .venv/bin/activate
 
 pip install -e ".[dev]"
 ```
+
+A step-by-step walkthrough on a real APK, including what every error means, is
+in [`docs/USAGE.md`](docs/USAGE.md).
 
 ### jadx (optional, needed for M2)
 
