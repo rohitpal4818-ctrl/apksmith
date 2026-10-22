@@ -259,7 +259,7 @@ is a test asserting F-Droid does not score above 95.
 ## Testing
 
 ```bash
-pytest                    # 197 tests, no key or network needed
+pytest                    # 201 tests, no key or network needed
 ruff check src tests      # lint
 ruff format src tests     # format
 ```

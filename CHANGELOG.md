@@ -9,6 +9,11 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Direct tests for the file writer.** `tests/test_fileio.py` covers the one
+  function every artefact goes through: CRLF input, non-ASCII text, parent
+  directory creation, and the returned path. The generate tests only proved
+  that the templates happen to contain no CRLF; these prove the writer does
+  not introduce any.
 - **Jules setup.** `AGENTS.md` states the rules an automated agent must not
   break: no invented behaviour, no secrets, no network in tests, no writing
   files outside `fileio`, and what to do when the test count moves. An issue
@@ -24,6 +29,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`write_text` only half-kept its promise.** The `newline="\n"` argument
+  stops the platform from translating newlines, but it passes an existing
+  `\r\n` straight through, so content assembled from a Windows-authored file
+  reached disk with CRLF while the docstring promised LF. The writer now
+  normalises `\r\n` and lone `\r` to `\n` first, and `tests/test_fileio.py`
+  fails if that step is removed.
 - **The extraction ratio was understated.** `extract.py` claimed roughly 85%
   on the strength of a one-off measurement. Re-measured on F-Droid 2.0.1 with
   jadx 1.5.6: 990 files totalling 10.9 MB become 705 KB of summaries, so the
