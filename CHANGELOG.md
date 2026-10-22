@@ -9,6 +9,12 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Jules setup.** `AGENTS.md` states the rules an automated agent must not
+  break: no invented behaviour, no secrets, no network in tests, no writing
+  files outside `fileio`, and what to do when the test count moves. An issue
+  template carries the `jules` label so a task can be assigned from GitHub, and
+  `docs/JULES.md` covers the one-time browser setup, what to hand Jules, and how
+  to review the pull request it returns.
 - **An obfuscated-tree test for M2.** A tree whose every identifier is one
   letter, run through extract, rank, select and the pipeline. It pins the limit
   rather than pretending there is none: role classification has nothing to

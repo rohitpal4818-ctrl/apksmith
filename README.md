@@ -205,7 +205,8 @@ apksmith/
   evaluation/     hand-written references and an example spec
   reports/        committed sample output, with provenance in README.md
   scripts/        sample fetch, doc-claim checker, publication helper
-  docs/           architecture and testing notes
+  docs/           architecture, testing and Jules notes
+  AGENTS.md       rules an automated agent must not break (Jules reads this)
 ```
 
 Directories are named for what they do, not for the milestone they belong to.
@@ -308,6 +309,8 @@ apksmith generate run evaluation/example_spec.json --out build/recon
   why the hard parts are hard
 - [`docs/TESTING.md`](docs/TESTING.md) — what each test file pins, and what it
   deliberately does not
+- [`docs/JULES.md`](docs/JULES.md) — how to hand a task to Jules and review the
+  pull request; the rules it follows are in [`AGENTS.md`](AGENTS.md)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, and what this project believes
 - [`CHANGELOG.md`](CHANGELOG.md) — what changed and what is still broken
 

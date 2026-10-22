@@ -6,6 +6,7 @@
 | [`USAGE.md`](USAGE.md) | You want to run it: every command, every option that matters, and what each error means. |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | You want to know how it is put together and why the hard parts are hard. |
 | [`TESTING.md`](TESTING.md) | You are changing something and want to know what the tests pin, and what they deliberately do not. |
+| [`JULES.md`](JULES.md) | You want to hand a task to Jules, or review what it sent back. |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | You want to set up a development environment or send a change. |
 | [`../reports/README.md`](../reports/README.md) | You want to know how the committed sample output was produced. |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | You want the history, including what was broken and why. |
