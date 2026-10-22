@@ -86,5 +86,6 @@ Red flags worth a second look:
 | Pro | 100 | 15 |
 | Ultra | 300 | 60 |
 
-Free tier runs on Gemini 2.5 Pro; the paid tiers give access to Gemini 3 Pro.
-The free tier is enough for a few small pull requests a day.
+Free tier runs on Gemini Flash models. The exact model is shown in the Jules
+UI and changes as Google ships new ones, so this page does not pin it. The free
+tier is enough for a few small pull requests a day.
