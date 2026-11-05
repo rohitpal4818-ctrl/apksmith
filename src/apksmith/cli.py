@@ -19,6 +19,7 @@ from pathlib import Path
 import typer
 
 from . import __version__
+from .analyze.xrefs import build_xref_index
 from .app import analyse, coverage_notes
 from .commands import evaluate as evaluate_cmd
 from .commands import generate as generate_cmd
@@ -106,6 +107,47 @@ def mcp() -> None:
     from .mcp_server import main as run_mcp_server
 
     run_mcp_server()
+
+
+@cli.command()
+def xrefs(
+    apk: Path = typer.Argument(..., exists=True, help="Path to the .apk file"),
+    string: str = typer.Option(
+        None, "--string", "-s", help="Only show methods referencing this string"
+    ),
+    limit: int = typer.Option(50, "--limit", help="Maximum number of strings to list"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show pipeline progress"),
+) -> None:
+    """List which methods reference which string literals (cross-references).
+
+    This is the DEX-level counterpart to ``scan``: instead of "this value
+    exists in the binary" it reports "these methods load it".
+    """
+    configure_logging(verbose=verbose)
+    from .ingest.apkfile import load_apk
+
+    try:
+        loaded = load_apk(apk)
+    except ApkSmithError as exc:
+        typer.secho(f"error: {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
+
+    index = build_xref_index(loaded)
+    if string:
+        owners = index.owners_of(string)
+        typer.echo(f"{len(owners)} method(s) reference {string!r}:")
+        for class_name, method_name in owners:
+            typer.echo(f"  {class_name}#{method_name}")
+        return
+
+    items = sorted(index.string_to_methods.items())[:limit]
+    typer.echo(f"{len(index.string_to_methods)} distinct strings referenced")
+    for literal, methods in items:
+        typer.echo(f"\n{literal!r}  ({len(methods)} method(s))")
+        for class_name, method_name in methods[:5]:
+            typer.echo(f"  {class_name}#{method_name}")
+        if len(methods) > 5:
+            typer.echo(f"  ... and {len(methods) - 5} more")
 
 
 def main() -> None:

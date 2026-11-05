@@ -259,7 +259,7 @@ is a test asserting F-Droid does not score above 95.
 ## Testing
 
 ```bash
-pytest                    # 201 tests, no key or network needed
+pytest                    # 206 tests, no key or network needed
 ruff check src tests      # lint
 ruff format src tests     # format
 ```
@@ -334,10 +334,13 @@ Next steps, in order of value:
    committed live run used an unobfuscated F-Droid build.
 2. Send one request through the Groq backend. The wiring is tested with a stub,
    not with Groq itself.
-3. Grow the evaluation suite past two apps. Two is a demonstration, not a
+3. ~~Grow the evaluation suite past two apps.~~ Done: three apps now (added a
+   hand-written weather-app reference). Three is still a demonstration, not a
    benchmark.
-4. Add real cross-reference analysis so findings can be promoted from
-   "a string exists" to "this method calls this API".
+4. ~~Add real cross-reference analysis.~~ Done: ``apksmith xrefs`` reports which
+   methods load each string literal, via ``const-string`` instructions in the
+   DEX. Findings are still reported at string-pool level, but the owning
+   method is now recoverable on demand.
 
 ---
 

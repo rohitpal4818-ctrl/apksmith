@@ -26,6 +26,14 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   match, so every class lands in `other`, but string literals survive and a
   spec is still produced. No shipped obfuscated APK has been tested yet, and
   the roadmap says so.
+- **A third evaluation case.** `evaluation/suite.json` now carries a
+  hand-written reference and spec for a small weather app alongside F-Droid
+  and the expense tracker, so the suite is no longer a two-app demonstration.
+- **DEX-level cross-references.** New `apksmith.analyze.xrefs` module and
+  `apksmith xrefs` command report which methods load a given string literal,
+  via ``const-string`` instructions. This narrows "a string exists in the
+  binary" to "these methods touch it"; it is not control-flow analysis and
+  does not claim to be.
 
 ### Fixed
 
